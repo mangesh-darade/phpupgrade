@@ -2940,7 +2940,7 @@ class Shop extends MY_Controller {
         }
 
         /** Google Login * */
-        include_once APPPATH . "third_party/googlelogin/autoload.php";
+        include_once APPPATH . "third_party/autoload.php";
 
         $google_client = new Google_Client();
 
@@ -2980,7 +2980,7 @@ class Shop extends MY_Controller {
         }
 
         /** Google Login * */
-//        include_once APPPATH . "third_party/googlelogin/autoload.php";
+//        include_once APPPATH . "third_party/autoload.php";
 //        $google_client = new Google_Client();
 //
 //        $google_client->setClientId('970274428101-9ik4fu8dk2god6k1thdrevu0t0k3csgd.apps.googleusercontent.com'); //Define your ClientID
@@ -4119,7 +4119,7 @@ class Shop extends MY_Controller {
      * Google Login Method
      */
     public function googlelogin() {
-        include_once APPPATH . "third_party/googlelogin/autoload.php";
+        include_once APPPATH . "third_party/autoload.php";
 
         $google_client = new Google_Client();
 

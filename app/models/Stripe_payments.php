@@ -1,6 +1,6 @@
 <?php defined('BASEPATH') OR exit('No direct script access allowed');
 
-require_once(APPPATH . 'third_party/stripe/init.php');
+require_once APPPATH . 'third_party/autoload.php';
 
 class Stripe_payments extends CI_Model
 {
@@ -80,8 +80,7 @@ class Stripe_payments extends CI_Model
     {
         try {
             $ch = \Stripe\Charge::all(array(
-                'count' => $num_charges,
-                'offset' => $offset
+                'limit' => $num_charges,
             ));
             $data['error'] = FALSE;
             $raw_data = array();
@@ -110,7 +109,7 @@ class Stripe_payments extends CI_Model
             $charge = \Stripe\Charge::create(array(
                 'amount' => $amount,
                 'currency' => $currency,
-                'card' => $token,
+                'source' => $token,
                 'description' => $description
             ));
             return $charge;
@@ -145,13 +144,16 @@ class Stripe_payments extends CI_Model
 
     function refund($transaction_id, $amount = 'all')
     {
-        $transaction = $this->get($transaction_id);
+        $transaction = $this->get_transaction($transaction_id);
         if ($transaction) {
             if ($amount == 'all') {
-                $amount = $transaction['amount'];
+                $amount = $transaction->amount;
             }
             try {
-                $response = $transaction->refund(array('amount' => $amount));
+                $response = \Stripe\Refund::create(array(
+                    'charge' => $transaction_id,
+                    'amount' => $amount
+                ));
                 return $response;
             } catch (Exception $e) {
                 $this->error = TRUE;
@@ -167,14 +169,26 @@ class Stripe_payments extends CI_Model
 
     function charge_to_array($charge)
     {
+        $card = null;
+        if (isset($charge->source) && is_object($charge->source)) {
+            $card = $charge->source;
+        } elseif (isset($charge->payment_method_details->card)) {
+            $card = $charge->payment_method_details->card;
+        }
+        $fee = 0;
+        if (isset($charge->balance_transaction) && is_object($charge->balance_transaction) && isset($charge->balance_transaction->fee)) {
+            $fee = $charge->balance_transaction->fee;
+        } elseif (isset($charge->fee)) {
+            $fee = $charge->fee;
+        }
         $data = array(
             'id' => $charge->id,
-            'invoice' => $charge->invoice,
-            'card' => $this->card_to_array($charge->card),
+            'invoice' => isset($charge->invoice) ? $charge->invoice : null,
+            'card' => $card ? $this->card_to_array($card) : array(),
             'livemode' => $charge->livemode,
             'amount' => $charge->amount,
-            'failure_message' => $charge->failure_message,
-            'fee' => $charge->fee,
+            'failure_message' => isset($charge->failure_message) ? $charge->failure_message : null,
+            'fee' => $fee,
             'currency' => $charge->currency,
             'paid' => $charge->paid,
             'description' => $charge->description,
@@ -182,7 +196,7 @@ class Stripe_payments extends CI_Model
             'object' => $charge->object,
             'refunded' => $charge->refunded,
             'created' => date('Y-m-d H:i:s', $charge->created),
-            'customer' => $charge->customer,
+            'customer' => isset($charge->customer) ? $charge->customer : null,
             'amount_refunded' => $charge->amount_refunded,
         );
         return $data;
@@ -191,23 +205,23 @@ class Stripe_payments extends CI_Model
     function card_to_array($card)
     {
         $data = array(
-            'address_country' => $card->address_country,
-            'type' => $card->type,
-            'address_zip_check' => $card->address_zip_check,
-            'fingerprint' => $card->fingerprint,
-            'address_state' => $card->address_state,
-            'exp_month' => $card->exp_month,
-            'address_line1_check' => $card->address_line1_check,
-            'country' => $card->country,
-            'last4' => $card->last4,
-            'exp_year' => $card->exp_year,
-            'address_zip' => $card->address_zip,
-            'object' => $card->object,
-            'address_line1' => $card->address_line1,
-            'name' => $card->name,
-            'address_line2' => $card->address_line2,
-            'id' => $card->id,
-            'cvc_check' => $card->cvc_check,
+            'address_country' => isset($card->address_country) ? $card->address_country : null,
+            'type' => isset($card->type) ? $card->type : (isset($card->brand) ? $card->brand : null),
+            'address_zip_check' => isset($card->address_zip_check) ? $card->address_zip_check : null,
+            'fingerprint' => isset($card->fingerprint) ? $card->fingerprint : null,
+            'address_state' => isset($card->address_state) ? $card->address_state : null,
+            'exp_month' => isset($card->exp_month) ? $card->exp_month : null,
+            'address_line1_check' => isset($card->address_line1_check) ? $card->address_line1_check : null,
+            'country' => isset($card->country) ? $card->country : null,
+            'last4' => isset($card->last4) ? $card->last4 : null,
+            'exp_year' => isset($card->exp_year) ? $card->exp_year : null,
+            'address_zip' => isset($card->address_zip) ? $card->address_zip : null,
+            'object' => isset($card->object) ? $card->object : null,
+            'address_line1' => isset($card->address_line1) ? $card->address_line1 : null,
+            'name' => isset($card->name) ? $card->name : null,
+            'address_line2' => isset($card->address_line2) ? $card->address_line2 : null,
+            'id' => isset($card->id) ? $card->id : null,
+            'cvc_check' => isset($card->cvc_check) ? $card->cvc_check : (isset($card->checks->cvc_check) ? $card->checks->cvc_check : null),
         );
         return $data;
     }

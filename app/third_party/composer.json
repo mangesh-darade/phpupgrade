@@ -1,0 +1,17 @@
+{
+    "name": "elintpos/third-party",
+    "description": "PHP 8.5 compatible third-party libraries for ElintPOS",
+    "require": {
+        "php": ">=8.1",
+        "mpdf/mpdf": "^8.2",
+        "stripe/stripe-php": "^16.0",
+        "google/apiclient": "^2.18"
+    },
+    "config": {
+        "vendor-dir": "vendor",
+        "sort-packages": true,
+        "allow-plugins": {
+            "php-http/discovery": true
+        }
+    }
+}
