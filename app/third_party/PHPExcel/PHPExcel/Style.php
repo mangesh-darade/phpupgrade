@@ -33,6 +33,7 @@
  * @package    PHPExcel_Style
  * @copyright  Copyright (c) 2006 - 2014 PHPExcel (http://www.codeplex.com/PHPExcel)
  */
+#[\AllowDynamicProperties]
 class PHPExcel_Style extends PHPExcel_Style_Supervisor implements PHPExcel_IComparable
 {
     /**

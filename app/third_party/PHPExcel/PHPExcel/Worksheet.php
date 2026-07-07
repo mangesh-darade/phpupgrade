@@ -33,6 +33,7 @@
  * @package    PHPExcel_Worksheet
  * @copyright  Copyright (c) 2006 - 2014 PHPExcel (http://www.codeplex.com/PHPExcel)
  */
+#[\AllowDynamicProperties]
 class PHPExcel_Worksheet implements PHPExcel_IComparable
 {
     /* Break types */
@@ -338,7 +339,7 @@ class PHPExcel_Worksheet implements PHPExcel_IComparable
      * @param PHPExcel        $pParent
      * @param string        $pTitle
      */
-    public function __construct(PHPExcel $pParent = null, $pTitle = 'Worksheet')
+    public function __construct(?PHPExcel $pParent = null, $pTitle = 'Worksheet')
     {
         // Set parent and title
         $this->_parent = $pParent;
@@ -573,7 +574,7 @@ class PHPExcel_Worksheet implements PHPExcel_IComparable
      * @param int|null $iChartIndex Index where chart should go (0,1,..., or null for last)
      * @return PHPExcel_Chart
      */
-    public function addChart(PHPExcel_Chart $pChart = null, $iChartIndex = null)
+    public function addChart(?PHPExcel_Chart $pChart = null, $iChartIndex = null)
     {
         $pChart->setWorksheet($this);
         if (is_null($iChartIndex)) {
@@ -1477,7 +1478,7 @@ class PHPExcel_Worksheet implements PHPExcel_IComparable
      * @param $pValue PHPExcel_Style_Conditional[]
      * @return PHPExcel_Worksheet
      */
-    public function setConditionalStyles($pCoordinate = 'A1', $pValue)
+    public function setConditionalStyles($pCoordinate = 'A1', $pValue = null)
     {
         $this->_conditionalStylesCollection[$pCoordinate] = $pValue;
         return $this;
@@ -1506,7 +1507,7 @@ class PHPExcel_Worksheet implements PHPExcel_IComparable
      * @throws PHPExcel_Exception
      * @return PHPExcel_Worksheet
      */
-    public function setSharedStyle(PHPExcel_Style $pSharedCellStyle = null, $pRange = '')
+    public function setSharedStyle(?PHPExcel_Style $pSharedCellStyle = null, $pRange = '')
     {
         $this->duplicateStyle($pSharedCellStyle, $pRange);
         return $this;
@@ -1522,7 +1523,7 @@ class PHPExcel_Worksheet implements PHPExcel_IComparable
      * @throws PHPExcel_Exception
      * @return PHPExcel_Worksheet
      */
-    public function duplicateStyle(PHPExcel_Style $pCellStyle = null, $pRange = '')
+    public function duplicateStyle(?PHPExcel_Style $pCellStyle = null, $pRange = '')
     {
         // make sure we have a real style and not supervisor
         $style = $pCellStyle->getIsSupervisor() ? $pCellStyle->getSharedComponent() : $pCellStyle;
@@ -1568,7 +1569,7 @@ class PHPExcel_Worksheet implements PHPExcel_IComparable
      * @throws PHPExcel_Exception
      * @return PHPExcel_Worksheet
      */
-    public function duplicateConditionalStyle(array $pCellStyle = null, $pRange = '')
+    public function duplicateConditionalStyle(?array $pCellStyle = null, $pRange = '')
     {
         foreach($pCellStyle as $cellStyle) {
             if (!($cellStyle instanceof PHPExcel_Style_Conditional)) {
@@ -2654,7 +2655,7 @@ class PHPExcel_Worksheet implements PHPExcel_IComparable
      * @param    PHPExcel_Cell_Hyperlink    $pHyperlink
      * @return PHPExcel_Worksheet
      */
-    public function setHyperlink($pCellCoordinate = 'A1', PHPExcel_Cell_Hyperlink $pHyperlink = null)
+    public function setHyperlink($pCellCoordinate = 'A1', ?PHPExcel_Cell_Hyperlink $pHyperlink = null)
     {
         if ($pHyperlink === null) {
             unset($this->_hyperlinkCollection[$pCellCoordinate]);
@@ -2709,7 +2710,7 @@ class PHPExcel_Worksheet implements PHPExcel_IComparable
      * @param    PHPExcel_Cell_DataValidation    $pDataValidation
      * @return PHPExcel_Worksheet
      */
-    public function setDataValidation($pCellCoordinate = 'A1', PHPExcel_Cell_DataValidation $pDataValidation = null)
+    public function setDataValidation($pCellCoordinate = 'A1', ?PHPExcel_Cell_DataValidation $pDataValidation = null)
     {
         if ($pDataValidation === null) {
             unset($this->_dataValidationCollection[$pCellCoordinate]);
