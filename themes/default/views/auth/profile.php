@@ -225,7 +225,7 @@
                                                                                     <?php
                                                                                     // Keep user-selected warehouses first, in the saved order,
                                                                                     // then list remaining warehouses.
-                                                                                    $userwarehouse = array_filter(explode(",", $user->warehouse_id));
+                                                                                    $userwarehouse = array_filter(explode(",", (string)($user->warehouse_id ?? '')));
 
                                                                                     // Index warehouses by id.
                                                                                     $warehousesById = [];
@@ -268,7 +268,7 @@
                                                                                     class="form-control select"
                                                                                     style="width:100%;">
                                                                                     <?php
-                                                                                    $userwarehouse = array_filter(explode(",", $user->warehouse_id));
+                                                                                    $userwarehouse = array_filter(explode(",", (string)($user->warehouse_id ?? '')));
                                                                                     $warehousesById = [];
                                                                                     if (!empty($warehouses)) {
                                                                                         foreach ($warehouses as $w) {
@@ -356,7 +356,7 @@
                                                                             </div>
 
                                                                             <?php if($pos_type == 'restaurant'){ 
-                                                                                  $tablesSelected = explode(",", $user->table_assign);
+                                                                                  $tablesSelected = explode(",", (string)($user->table_assign ?? ''));
                                                                                 ?>
                                                                             <div class="form-group">
                                                                                 <label for="restaurantTables">
@@ -541,6 +541,8 @@
 				$res    = post_to_url($surl, $data); 
 				//var_dump(json_decode($res));
 				$result1 = json_decode($res, true);
+				$mer_type = $mer_name = $mer_address = $mer_email = $mer_phone = '';
+				if (is_array($result1)) {
 				foreach ($result1 as $merchant) {
 				$mer_type = $merchant['type'];
 				$mer_name = $merchant['name'];
@@ -551,6 +553,7 @@
 				$mer_pos_create_at = $merchant['pos_create_at'];
 				$mer_pos_demo_expiry_at = $merchant['pos_demo_expiry_at'];
 				$mer_pos_name = $merchant['pos_name'];
+				}
 				}
 
 				//return $res;

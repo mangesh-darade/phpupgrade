@@ -8,9 +8,10 @@
             <button type="button" class="btn btn-xs btn-default no-print pull-right" style="margin-right:15px;" onclick="printCustomerViewModal(this);">
                 <i class="fa fa-print"></i> <?= lang('print'); ?>
             </button>
-            <h4 class="modal-title" id="myModalLabel"><?= $customer->company && $customer->company != '-' ? $customer->company : $customer->name; ?></h4>
+            <h4 class="modal-title" id="myModalLabel"><?= !empty($customer) ? ($customer->company && $customer->company != '-' ? $customer->company : $customer->name) : lang('customer_x_deleted'); ?></h4>
         </div>
         <div class="modal-body">
+            <?php if (!empty($customer)) { ?>
             <div class="table-responsive">
             	
                 <table class="table table-striped table-bordered" style="margin-bottom:0;">
@@ -133,12 +134,15 @@
                     </tbody>
                 </table>
             </div>
+            <?php } else { ?>
+            <p class="text-danger"><?= !empty($error) ? $error : lang('customer_x_deleted'); ?></p>
+            <?php } ?>
             <div class="modal-footer no-print">
                 <button type="button" class="btn btn-default pull-left" data-dismiss="modal"><?= lang('close'); ?></button>
-                <?php if ($Owner || $Admin || $GP['reports-customers']) { ?>
+                <?php if (!empty($customer) && ($Owner || $Admin || !empty($GP['reports-customers']))) { ?>
                     <a href="<?=site_url('reports/customer_report/'.$customer->id);?>"  class="btn btn-primary"><?= lang('customers_report'); ?></a>
                 <?php } ?>
-                <?php if ($Owner || $Admin || $GP['customers-edit']) { ?>
+                <?php if (!empty($customer) && ($Owner || $Admin || !empty($GP['customers-edit']))) { ?>
                     <a href="<?=site_url('customers/edit/'.$customer->id);?>" data-toggle="modal" data-target="#myModal2" class="btn btn-primary"><?= lang('edit_customer'); ?></a>
                 <?php } ?>
             </div>

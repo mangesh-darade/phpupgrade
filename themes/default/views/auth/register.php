@@ -55,15 +55,15 @@
                             <button data-dismiss="alert" class="close" type="button">×</button>
                             <?= lang('site_is_offline') ?>
                         </div>
-                    <? }
-                    if ($message) { ?>
+                    <?php }
+                    if (!empty($message)) { ?>
                         <div class="alert alert-success">
                             <button data-dismiss="alert" class="close" type="button">×</button>
                             <?= $message; ?>
                         </div>
                     <?php } ?>
                     <?php
-                    if ($error) { ?>
+                    if (!empty($error)) { ?>
                         <div class="alert alert-danger">
                             <button data-dismiss="alert" class="close" type="button">×</button>
                             <?= $error; ?>

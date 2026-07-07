@@ -165,6 +165,7 @@
                     <?php
                         $r = 1;
                         $total_net_unit_cost = 0;
+                        if (!empty($rows)) {
                         foreach ($rows as $row):
                             if($row->tax_code == ''){
                                $row->tax_code = '0GST';
@@ -232,6 +233,7 @@
                             <?php
                             $r++;
                         endforeach;
+                        }
                         if ($return_rows) {
                             echo '<tr class="warning"><td colspan="'.($col+2).'" class="no-border"><strong>'.lang('returned_items').'</strong></td></tr>';
                             $total_net_unit_cost = 0;

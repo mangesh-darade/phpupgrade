@@ -146,6 +146,7 @@
                     <?php $r = 1;
                     $tax_summary = array();
                     $total_netcost = 0;$totalqty =0;
+                    if (!empty($rows)) {
                     foreach ($rows as $row):
                      $offset = 6;
                          if($row->tax_code == ''){
@@ -225,6 +226,7 @@
                         $r++;
                         $totalqty += $row->unit_quantity;
                     endforeach;
+                    }
                     if ($return_rows) {
                         echo '<tr class="warning"><td colspan="100%" class="no-border"><strong>'.lang('returned_items').'</strong></td></tr>';
                         foreach ($return_rows as $row):

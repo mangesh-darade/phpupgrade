@@ -47,7 +47,7 @@
                     <div class="header bblue">
                         <?= $this->lang->line('forgot_password_heading') ?>
                     </div>
-                    <?php if ($message) { ?>
+                    <?php if (!empty($message)) { ?>
                         <div class="alert alert-danger">
                             <button data-dismiss="alert" class="close" type="button">×</button>
                             <?= $message; ?>

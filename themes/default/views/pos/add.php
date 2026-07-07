@@ -5515,7 +5515,7 @@ if ($Settings->attributes == 1 && $pos_settings->product_variant_popup == 1) {
     <div id="ajaxCall"><i class="fa fa-spinner fa-pulse"></i></div>
     <?php
         if (isset($_REQUEST['test'])) {
-            $errorUrl = "http://" . $_SERVER[HTTP_HOST] . $_SERVER[REQUEST_URI];
+            $errorUrl = "http://" . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
             $logger = array('Testing error view', $errorUrl);
             $this->sma->pos_error_log($logger);
         }
@@ -7471,7 +7471,7 @@ if ($_SESSION['Print_Deposite_Receipt']['status'] == '1') {
 
 
 
-    <?php if ($_GET['checkout'] == '1') { ?>
+    <?php if (isset($_GET['checkout']) && $_GET['checkout'] == '1') { ?>
     setTimeout(function() {
         $('#payment').trigger('click');
     }, 1000);

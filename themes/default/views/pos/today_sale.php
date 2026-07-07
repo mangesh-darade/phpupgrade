@@ -1,4 +1,15 @@
-<?php defined('BASEPATH') OR exit('No direct script access allowed'); ?>
+<?php defined('BASEPATH') OR exit('No direct script access allowed');
+$totalsalespaid = $totalsalespaid ?: (object) array('paid' => 0);
+$totalsales = $totalsales ?: (object) array('total' => 0);
+$refunds = $refunds ?: (object) array('returned' => 0, 'total' => 0);
+$duepayment = $duepayment ?: (object) array('total' => 0);
+$duepartial = $duepartial ?: (object) array('partial_due' => 0);
+$cashsales = $cashsales ?: (object) array('paid' => 0);
+$deposit_received = $deposit_received ?: (object) array('paid_by' => '', 'deposit_amount' => 0);
+$bank_details = $bank_details ?: (object) array('bank_deposit' => 0, 'withdrawal' => 0);
+$today_bank_deposit = $today_bank_deposit ?: (object) array('total_bank_deposit' => 0);
+$today_withdrawal = $today_withdrawal ?: (object) array('total_withdrawal' => 0);
+?>
 <div class="modal-dialog">
     <div class="modal-content">
         <div class="modal-header">
@@ -42,7 +53,7 @@
                 <tr>
                     <td width="300px;"><h4 style="font-weight:bold;"><?= lang('total_sales'); ?>:</h4></td>
                     <td width="100px;" style="text-align:right;"><h4 style="font-weight:bold;">
-                        <?= $this->sma->formatMoney($totalsales->total ? $totalsales->total+ str_replace("-", '', $refunds->returned) : '0.00') ?></td>
+                        <?= $this->sma->formatMoney($totalsales->total ? $totalsales->total + str_replace("-", '', (string)($refunds->returned ?? '0')) : '0.00') ?></td>
                     <!--<td width="100px;" style="text-align:right;"><h4 style="font-weight:bold;">
                         <?= $this->sma->formatMoney($totalsales->total ? $totalsales->total : '0.00'); ?>
                     </td>-->

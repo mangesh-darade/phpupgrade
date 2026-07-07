@@ -55,6 +55,9 @@ class Bcrypt
             (strtoupper(substr(PHP_OS, 0, 3)) !== 'WIN')
         ) { // OpenSSL slow on Win
             $bytes = openssl_random_pseudo_bytes($count);
+            if ($bytes === false) {
+                $bytes = '';
+            }
         }
 
         if ($bytes === '' && @is_readable('/dev/urandom') &&

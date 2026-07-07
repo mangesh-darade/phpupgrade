@@ -17,7 +17,7 @@ class Quotes extends MY_Controller
         }
         if ($this->Supplier) {
             $this->session->set_flashdata('warning', lang('access_denied'));
-            redirect($_SERVER["HTTP_REFERER"]);
+            redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('quotes'));
         }
         $this->lang->load('quotations', $this->Settings->user_language);
         $this->load->library('form_validation');
@@ -40,7 +40,7 @@ class Quotes extends MY_Controller
         } else {
            $this->data['warehouses'] =  $this->site->getAllWarehouses();
             $this->data['warehouse_id'] = $warehouse_id == null?$this->session->userdata('warehouse_id'):$warehouse_id;
-            $this->data['warehouse'] = $this->session->userdata('warehouse_id') ? $this->site->getWarehouseByID($warehouse_id) : null;
+            $this->data['warehouse'] = $this->data['warehouse_id'] ? $this->site->getWarehouseByID($this->data['warehouse_id']) : null;
         }
 
         $bc = array(array('link' => base_url(), 'page' => lang('home')), array('link' => '#', 'page' => lang('quotes')));
@@ -114,14 +114,18 @@ class Quotes extends MY_Controller
         }
         $this->data['error'] = (validation_errors()) ? validation_errors() : $this->session->flashdata('error');
         $inv = $this->quotes_model->getQuoteByID($quote_id);
+        if (!$inv) {
+            $this->session->set_flashdata('error', lang('no_quote_selected'));
+            redirect('quotes');
+        }
         if (!$this->session->userdata('view_right')) {
             $this->sma->view_rights($inv->created_by, true);
         }
-        $this->data['rows'] = $this->quotes_model->getAllQuoteItems($quote_id);
+        $this->data['rows'] = $this->quotes_model->getAllQuoteItems($quote_id) ?: array();
         foreach ($this->data['rows'] as $row) {
             if (!empty($row->shade_id)) {
                 $colors = $this->quotes_model->getProductOptionByID($row->shade_id);
-                $row->shade_name= $colors->name;
+                $row->shade_name= ($colors && isset($colors->name)) ? $colors->name : '';
             }
         }
         $this->data['customer'] = $this->site->getCompanyByID($inv->customer_id);
@@ -132,10 +136,10 @@ class Quotes extends MY_Controller
         $this->data['inv'] = $inv;
         $_PID = $this->Settings->default_printer;
         $this->data['default_printer'] =  $this->site->defaultPrinterOption($_PID);
-        if($this->data['default_printer']->tax_classification_view):
-            $inv->rows_tax = $this->quotes_model->getAllTaxItems($inv->id,$inv->return_id) ;
+        if(!empty($this->data['default_printer']) && $this->data['default_printer']->tax_classification_view):
+            $inv->rows_tax = $this->quotes_model->getAllTaxItems($inv->id, isset($inv->return_id) ? $inv->return_id : null) ;
         endif; 
-        $this->data['taxItems'] = $this->quotes_model->getAllTaxItemsGroup($inv->id,$inv->return_id) ;
+        $this->data['taxItems'] = $this->quotes_model->getAllTaxItemsGroup($inv->id, isset($inv->return_id) ? $inv->return_id : null) ;
         $this->load->view($this->theme . 'quotes/modal_view', $this->data);
 
     }
@@ -150,14 +154,18 @@ class Quotes extends MY_Controller
         }
         $this->data['error'] = (validation_errors()) ? validation_errors() : $this->session->flashdata('error');
         $inv = $this->quotes_model->getQuoteByID($quote_id);
+        if (!$inv) {
+            $this->session->set_flashdata('error', lang('no_quote_selected'));
+            redirect('quotes');
+        }
         if (!$this->session->userdata('view_right')) {
             $this->sma->view_rights($inv->created_by);
         }
-        $this->data['rows'] = $this->quotes_model->getAllQuoteItems($quote_id);
+        $this->data['rows'] = $this->quotes_model->getAllQuoteItems($quote_id) ?: array();
         foreach ($this->data['rows'] as $row) {
             if (!empty($row->shade_id)) {
                 $colors = $this->quotes_model->getProductOptionByID($row->shade_id);
-                $row->shade_name= $colors->name;
+                $row->shade_name= ($colors && isset($colors->name)) ? $colors->name : '';
             }
         }
         $this->data['customer'] = $this->site->getCompanyByID($inv->customer_id);
@@ -168,10 +176,10 @@ class Quotes extends MY_Controller
         $this->data['inv'] = $inv; 
         $_PID = $this->Settings->default_printer;
         $this->data['default_printer'] =  $this->site->defaultPrinterOption($_PID);
-        if($this->data['default_printer']->tax_classification_view):
-            $inv->rows_tax = $this->quotes_model->getAllTaxItems($inv->id,$inv->return_id) ;
+        if(!empty($this->data['default_printer']) && $this->data['default_printer']->tax_classification_view):
+            $inv->rows_tax = $this->quotes_model->getAllTaxItems($inv->id, isset($inv->return_id) ? $inv->return_id : null) ;
         endif; 
-        $this->data['taxItems'] = $this->quotes_model->getAllTaxItemsGroup($inv->id,$inv->return_id) ;
+        $this->data['taxItems'] = $this->quotes_model->getAllTaxItemsGroup($inv->id, isset($inv->return_id) ? $inv->return_id : null) ;
         
         $bc = array(array('link' => base_url(), 'page' => lang('home')), array('link' => site_url('quotes'), 'page' => lang('quotes')), array('link' => '#', 'page' => lang('view')));
         $meta = array('page_title' => lang('view_quote_details'), 'bc' => $bc);
@@ -190,14 +198,18 @@ class Quotes extends MY_Controller
         }
         $this->data['error'] = (validation_errors()) ? validation_errors() : $this->session->flashdata('error');
         $inv = $this->quotes_model->getQuoteByID($quote_id);
+        if (!$inv) {
+            $this->session->set_flashdata('error', lang('no_quote_selected'));
+            redirect('quotes');
+        }
         if (!$this->session->userdata('view_right')) {
             $this->sma->view_rights($inv->created_by);
         }
-        $this->data['rows'] = $this->quotes_model->getAllQuoteItems($quote_id);
+        $this->data['rows'] = $this->quotes_model->getAllQuoteItems($quote_id) ?: array();
         foreach ($this->data['rows'] as $row) {
             if (!empty($row->shade_id)) {
                 $colors = $this->quotes_model->getProductOptionByID($row->shade_id);
-                $row->shade_name= $colors->name;
+                $row->shade_name= ($colors && isset($colors->name)) ? $colors->name : '';
             }
         }
         $this->data['customer'] = $this->site->getCompanyByID($inv->customer_id);
@@ -207,10 +219,10 @@ class Quotes extends MY_Controller
         $this->data['inv'] = $inv;
         $_PID = $this->Settings->default_printer;
         $this->data['default_printer'] =  $this->site->defaultPrinterOption($_PID);
-        if($this->data['default_printer']->tax_classification_view):
-            $inv->rows_tax = $this->quotes_model->getAllTaxItems($inv->id,$inv->return_id) ;
+        if(!empty($this->data['default_printer']) && $this->data['default_printer']->tax_classification_view):
+            $inv->rows_tax = $this->quotes_model->getAllTaxItems($inv->id, isset($inv->return_id) ? $inv->return_id : null) ;
         endif; 
-        $this->data['taxItems'] = $this->quotes_model->getAllTaxItemsGroup($inv->id,$inv->return_id) ;
+        $this->data['taxItems'] = $this->quotes_model->getAllTaxItemsGroup($inv->id, isset($inv->return_id) ? $inv->return_id : null) ;
         $name = $this->lang->line("quote") . "_" . str_replace('/', '_', $inv->reference_no) . ".pdf";
         $html = $this->load->view($this->theme . 'quotes/pdf', $this->data, true);
         if (! $this->Settings->barcode_img) {
@@ -232,6 +244,9 @@ class Quotes extends MY_Controller
             die('No quote selected.');
         }
         $inv = $this->quotes_model->getQuoteByID($quote_id);
+        if (!$inv) {
+            die('No quote selected.');
+        }
         $this->data['customer'] = $this->site->getCompanyByID($inv->customer_id);
         return $this->sma->send_json($this->data['customer']);
     }
@@ -260,7 +275,7 @@ class Quotes extends MY_Controller
         $this->data['error'] = (validation_errors()) ? validation_errors() : $this->session->flashdata('error');
         $inv = $this->quotes_model->getQuoteByID($quote_id);
 
-        $this->data['rows'] = $this->quotes_model->getAllQuoteItems($quote_id);
+        $this->data['rows'] = $this->quotes_model->getAllQuoteItems($quote_id) ?: array();
         $this->data['customer'] = $this->site->getCompanyByID($inv->customer_id);
         $this->data['biller'] = $this->site->getCompanyByID($inv->biller_id);
         $this->data['user'] = $this->site->getUser($inv->created_by);
@@ -268,10 +283,10 @@ class Quotes extends MY_Controller
         $this->data['inv'] = $inv;
         $_PID = $this->Settings->default_printer;
         $this->data['default_printer'] = $this->site->defaultPrinterOption($_PID);
-        if($this->data['default_printer']->tax_classification_view):
-            $inv->rows_tax = $this->quotes_model->getAllTaxItems($inv->id, $inv->return_id);
+        if(!empty($this->data['default_printer']) && $this->data['default_printer']->tax_classification_view):
+            $inv->rows_tax = $this->quotes_model->getAllTaxItems($inv->id, isset($inv->return_id) ? $inv->return_id : null);
         endif;
-        $this->data['taxItems'] = $this->quotes_model->getAllTaxItemsGroup($inv->id, $inv->return_id);
+        $this->data['taxItems'] = $this->quotes_model->getAllTaxItemsGroup($inv->id, isset($inv->return_id) ? $inv->return_id : null);
         $name = $this->lang->line("quote") . "_" . str_replace('/', '_', $inv->reference_no) . ".pdf";
         $html = $this->load->view($this->theme . 'quotes/pdf', $this->data, TRUE);
         if( ! $this->Settings->barcode_img)
@@ -297,14 +312,17 @@ class Quotes extends MY_Controller
 
             $this->data['error'] = (validation_errors()) ? validation_errors() : $this->session->flashdata('error');
             $inv = $this->quotes_model->getQuoteByID($quote_id);
+            if (!$inv) {
+                continue;
+            }
             if (!$this->session->userdata('view_right')) {
                 $this->sma->view_rights($inv->created_by);
             }
-            $this->data['rows'] = $this->quotes_model->getAllQuoteItems($quote_id);
+            $this->data['rows'] = $this->quotes_model->getAllQuoteItems($quote_id) ?: array();
             foreach ($this->data['rows'] as $row) {
             if (!empty($row->shade_id)) {
                 $colors = $this->quotes_model->getProductOptionByID($row->shade_id);
-                $row->shade_name= $colors->name;
+                $row->shade_name= ($colors && isset($colors->name)) ? $colors->name : '';
             }
         }
             $this->data['customer'] = $this->site->getCompanyByID($inv->customer_id);
@@ -312,7 +330,7 @@ class Quotes extends MY_Controller
             $this->data['user'] = $this->site->getUser($inv->created_by);
             $this->data['warehouse'] = $this->site->getWarehouseByID($inv->warehouse_id);
             $this->data['inv'] = $inv;
-            $this->data['taxItems'] = $this->quotes_model->getAllTaxItemsGroup($inv->id, $inv->return_id);
+            $this->data['taxItems'] = $this->quotes_model->getAllTaxItemsGroup($inv->id, isset($inv->return_id) ? $inv->return_id : null);
 
             $html[] = array(
                 'content' => $this->load->view($this->theme . 'quotes/pdf', $this->data, true),
@@ -333,6 +351,10 @@ class Quotes extends MY_Controller
             $quote_id = $this->input->get('id');
         }
         $inv = $this->quotes_model->getQuoteByID($quote_id);
+        if (!$inv) {
+            $this->session->set_flashdata('error', lang('no_quote_selected'));
+            redirect('quotes');
+        }
         $this->form_validation->set_rules('to', $this->lang->line("to") . " " . $this->lang->line("email"), 'trim|required|valid_email');
         $this->form_validation->set_rules('subject', $this->lang->line("subject"), 'trim|required');
         $this->form_validation->set_rules('cc', $this->lang->line("cc"), 'trim|valid_emails');
@@ -377,7 +399,7 @@ class Quotes extends MY_Controller
         } elseif ($this->input->post('send_email')) {
             $this->data['error'] = (validation_errors() ? validation_errors() : $this->session->flashdata('error'));
             $this->session->set_flashdata('error', $this->data['error']);
-            redirect($_SERVER["HTTP_REFERER"]);
+            redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('quotes'));
            //redirect("quotes");
         }
 
@@ -385,7 +407,7 @@ class Quotes extends MY_Controller
             delete_files($attachment);
            // $this->db->update('quotes', array('status' => 'sent'), array('id' => $quote_id));
             $this->session->set_flashdata('message', $this->lang->line("email_sent_msg"));
-            redirect($_SERVER["HTTP_REFERER"]);
+            redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('quotes'));
         } else {
 
             $this->data['error'] = (validation_errors() ? validation_errors() : $this->session->flashdata('error'));
@@ -486,7 +508,7 @@ public function add(){
                     $dpos = strpos($discount, $percentage);
                     if ($dpos !== false) {
                         $pds = explode("%", $discount);
-                        $pr_discount = $this->sma->formatDecimal(((($this->sma->formatDecimal($unit_price)) * (Float) ($pds[0])) / 100), 4);
+                        $pr_discount = $this->sma->formatDecimal(((($this->sma->formatDecimal($unit_price)) * (float) ($pds[0])) / 100), 4);
                     } else {
                         $pr_discount = $this->sma->formatDecimal($discount);
                     }
@@ -579,7 +601,7 @@ public function add(){
             $opos = strpos($order_discount_id, $percentage);
             if ($opos !== false) {
                 $ods = explode("%", $order_discount_id);
-                $order_discount = $this->sma->formatDecimal(((($total + $product_tax) * (Float) ($ods[0])) / 100), 4);
+                $order_discount = $this->sma->formatDecimal(((($total + $product_tax) * (float) ($ods[0])) / 100), 4);
 
             } else {
                 $order_discount = $this->sma->formatDecimal($order_discount_id);
@@ -630,7 +652,7 @@ public function add(){
             'created_by' => $this->session->userdata('user_id'),
         );
 
-        if ($_FILES['document']['size'] > 0) {
+        if (!empty($_FILES['document']['size'])) {
             $this->load->library('upload');
             $config['upload_path'] = $this->digital_upload_path;
             $config['allowed_types'] = $this->digital_file_types;
@@ -641,7 +663,7 @@ public function add(){
             if (!$this->upload->do_upload('document')) {
                 $error = $this->upload->display_errors();
                 $this->session->set_flashdata('error', $error);
-                redirect($_SERVER["HTTP_REFERER"]);
+                redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('quotes'));
             }
             $photo = $this->upload->file_name;
             $data['attachment'] = $photo;
@@ -714,6 +736,10 @@ public function add(){
             $id = $this->input->get('id');
         }
         $inv = $this->quotes_model->getQuoteByID($id);
+        if (!$inv) {
+            $this->session->set_flashdata('error', lang('no_quote_selected'));
+            redirect('quotes');
+        }
         if (!$this->session->userdata('edit_right')) {
             $this->sma->view_rights($inv->created_by);
         }
@@ -788,7 +814,7 @@ public function add(){
                         $dpos = strpos($discount, $percentage);
                         if ($dpos !== false) {
                             $pds = explode("%", $discount);
-                            $pr_discount = $this->sma->formatDecimal(((($this->sma->formatDecimal($unit_price)) * (Float) ($pds[0])) / 100), 4);
+                            $pr_discount = $this->sma->formatDecimal(((($this->sma->formatDecimal($unit_price)) * (float) ($pds[0])) / 100), 4);
                         } else {
                             $pr_discount = $this->sma->formatDecimal($discount);
                         }
@@ -879,7 +905,7 @@ public function add(){
                 $opos = strpos($order_discount_id, $percentage);
                 if ($opos !== false) {
                     $ods = explode("%", $order_discount_id);
-                    $order_discount = $this->sma->formatDecimal(((($total + $product_tax) * (Float) ($ods[0])) / 100), 4);
+                    $order_discount = $this->sma->formatDecimal(((($total + $product_tax) * (float) ($ods[0])) / 100), 4);
 
                 } else {
                     $order_discount = $this->sma->formatDecimal($order_discount_id);
@@ -931,7 +957,7 @@ public function add(){
                 'updated_at' => date('Y-m-d H:i:s'),
             );
 
-            if ($_FILES['document']['size'] > 0) {
+            if (!empty($_FILES['document']['size'])) {
                 $this->load->library('upload');
                 $config['upload_path'] = $this->digital_upload_path;
                 $config['allowed_types'] = $this->digital_file_types;
@@ -942,7 +968,7 @@ public function add(){
                 if (!$this->upload->do_upload('document')) {
                     $error = $this->upload->display_errors();
                     $this->session->set_flashdata('error', $error);
-                    redirect($_SERVER["HTTP_REFERER"]);
+                    redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('quotes'));
                 }
                 $photo = $this->upload->file_name;
                 $data['attachment'] = $photo;
@@ -960,7 +986,7 @@ public function add(){
             $this->data['error'] = (validation_errors() ? validation_errors() : $this->session->flashdata('error'));
 
             $this->data['inv'] = $this->quotes_model->getQuoteByID($id);
-            $inv_items = $this->quotes_model->getAllQuoteItems($id);
+            $inv_items = $this->quotes_model->getAllQuoteItems($id) ?: array();
             foreach ($inv_items as $item) {
         if (!empty($item->shade_id)) {
             $color = $this->quotes_model->getProductOptionByID($item->shade_id); // fetch from same table
@@ -970,7 +996,9 @@ public function add(){
         }
     }
             
-            krsort($inv_items);
+            if (!empty($inv_items)) {
+                krsort($inv_items);
+            }
             $c = rand(100000, 9999999);
             foreach ($inv_items as $item) {
                 $row = $this->site->getProductByID($item->product_id);
@@ -988,7 +1016,7 @@ public function add(){
                     }
                 }
                 $unitData = $this->quotes_model->getUnitById($row->unit);
-                $row->unit_lable = $unitData->name;
+                $row->unit_lable = ($unitData && isset($unitData->name)) ? $unitData->name : '';
                 $row->id = $item->product_id;
                 $row->code = $item->product_code;
                 $row->name = $item->product_name;
@@ -1043,8 +1071,10 @@ public function add(){
                 $combo_items = false;
                 if ($row->type == 'combo') {
                     $combo_items = $this->quotes_model->getProductComboItems($row->id, $item->warehouse_id);
+                    if (!empty($combo_items)) {
                     foreach ($combo_items as $combo_item) {
                         $combo_item->quantity = $combo_item->qty * $item->quantity;
+                    }
                     }
                 }
                 $units = $this->site->getUnitsByBUID($row->base_unit);
@@ -1130,7 +1160,15 @@ public function add(){
 
         $warehouse = $this->site->getWarehouseByID($warehouse_id);
         $customer = $this->site->getCompanyByID($customer_id);
+        if (!$customer || !$warehouse) {
+            $this->sma->send_json(array(array('id' => 0, 'label' => lang('no_match_found'), 'value' => $term)));
+            return;
+        }
         $customer_group = $this->site->getCustomerGroupByID($customer->customer_group_id);
+        if (!$customer_group) {
+            $this->sma->send_json(array(array('id' => 0, 'label' => lang('no_match_found'), 'value' => $term)));
+            return;
+        }
         $rows = $this->quotes_model->getProductNames($sr, $warehouse_id);
         $this->load->model('DineIn_Bill_of_material_model');
         if ($rows) {
@@ -1151,7 +1189,7 @@ public function add(){
                 $options_color = $this->quotes_model->getProductOptionscolor($row->id, $warehouse_id, 2);
                 
                 if ($options) {
-                    $opt = $option_id && $r == 0 ? $this->quotes_model->getProductOptionByID($option_id) : $options[0];
+                    $opt = $option_id && $r == 0 ? $this->quotes_model->getProductOptionByID($option_id) : reset($options);
                     if (!$option_id || $r > 0) {
                         $option_id = $opt->id;
                     }
@@ -1204,11 +1242,11 @@ public function add(){
                 }
                 if ($row->promotion) {
                     $row->price = $row->promo_price;
-                } elseif ($customer->price_group_id) {
+                } elseif (!empty($customer->price_group_id)) {
                     if ($pr_group_price = $this->site->getProductGroupPrice($row->id, $customer->price_group_id)) {
                         $row->price = $pr_group_price->price;
                     }
-                } elseif ($warehouse->price_group_id) {
+                } elseif (!empty($warehouse->price_group_id)) {
                     if ($pr_group_price = $this->site->getProductGroupPrice($row->id, $warehouse->price_group_id)) {
                         $row->price = $pr_group_price->price;
                     }
@@ -1275,7 +1313,7 @@ public function add(){
     {
         if (!$this->Owner && !$this->GP['bulk_actions']) {
             $this->session->set_flashdata('warning', lang('access_denied'));
-            redirect($_SERVER["HTTP_REFERER"]);
+            redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('quotes'));
         }
 
         $this->form_validation->set_rules('form_action', lang("form_action"), 'required');
@@ -1290,7 +1328,7 @@ public function add(){
                         $this->quotes_model->deleteQuote($id);
                     }
                     $this->session->set_flashdata('message', $this->lang->line("quotes_deleted"));
-                    redirect($_SERVER["HTTP_REFERER"]);
+                    redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('quotes'));
 
                 } elseif ($this->input->post('form_action') == 'combine') {
 
@@ -1320,6 +1358,9 @@ public function add(){
 
                     foreach ($_POST['val'] as $id) {
                         $qu = $this->quotes_model->getQuoteByID($id);
+                        if (!$qu) {
+                            continue;
+                        }
                         $this->excel->getActiveSheet()->SetCellValue('A' . $row, $this->sma->hrld($qu->date));
                         $this->excel->getActiveSheet()->SetCellValue('B' . $row, $qu->reference_no);
                         $this->excel->getActiveSheet()->SetCellValue('C' . $row, $qu->biller);
@@ -1364,15 +1405,15 @@ public function add(){
                         return $objWriter->save('php://output');
                     }
 
-                    redirect($_SERVER["HTTP_REFERER"]);
+                    redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('quotes'));
                 }
             } else {
                 $this->session->set_flashdata('error', $this->lang->line("no_quote_selected"));
-                redirect($_SERVER["HTTP_REFERER"]);
+                redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('quotes'));
             }
         } else {
             $this->session->set_flashdata('error', validation_errors());
-            redirect($_SERVER["HTTP_REFERER"]);
+            redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('quotes'));
         }
     }
 
@@ -1394,7 +1435,12 @@ public function add(){
             redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : 'sales');
         } else {
 
-            $this->data['inv'] = $this->quotes_model->getQuoteByID($id);
+            $inv = $this->quotes_model->getQuoteByID($id);
+            if (!$inv) {
+                $this->session->set_flashdata('error', lang('no_quote_selected'));
+                redirect('quotes');
+            }
+            $this->data['inv'] = $inv;
             $this->data['modal_js'] = $this->site->modal_js();
             $this->load->view($this->theme.'quotes/update_status', $this->data);
 

@@ -11,6 +11,10 @@ This is a **CodeIgniter 3.1.13** ElintPOS/SMA ERP upgrade (`phpupgrade`). Target
 
 - **Do NOT change business logic** — sales, POS, payments, calculations, DB queries, workflows stay identical.
 - **Minimal diff only** — fix PHP 8.5 compatibility; no refactor, no cleanup, no "improvements" unless asked.
+- **Missing view/asset** — if controller already calls `load->view('module/foo')` and `foo.php` is absent (500 fatal), restore a minimal view matching existing `$data` — **not** a new feature.
+- **No new routes, screens, or workflows** — do not add tables, APIs, or business paths that did not exist in controller/plan before upgrade.
+- **Performance** — see `php-performance-core.mdc`: hot screens/AJAX **< 1s**, no over-engineering.
+- **Module complete** — see `php-module-complete-gate.mdc`: per-module screen + deep submit + **deep-link** tests; only test modules already upgraded.
 - **Preserve behavior** — same inputs → same outputs, same screens, same API responses.
 - **Do not commit** unless the user explicitly asks.
 - **Always use subagents (Task tool)** for every upgrade task — do not work solo on multi-step or module-wide jobs.
@@ -49,6 +53,8 @@ Use Cursor **Task** subagents on every PHP upgrade task:
 ## Upgrade Order
 
 Follow `PHP_UPGRADE_PLAN.md`: Framework → Third Party → App Code → Module screen testing (Auth, POS, Sales, Products first).
+
+**Fix history:** After every fix session, append **Old → New** rows to `PHP_UPGRADE_FIXES_LOG.md` per `php-upgrade-fixes-log.mdc`.
 
 ## Security Gate (before any task)
 

@@ -316,7 +316,7 @@ class Ion_auth
 
         $group = $this->getUserGroup($id);
 
-        if ($group->name === $check_group) {
+        if ($group && $group->name === $check_group) {
             return TRUE;
         }
 
@@ -339,7 +339,7 @@ class Ion_auth
         $user_id || $user_id = $this->session->userdata('user_id');
 
         $user = $this->ion_auth->user($user_id)->row();
-        return $user->group_id;
+        return $user ? $user->group_id : null;
     }
 
 

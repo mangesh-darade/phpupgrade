@@ -18,6 +18,7 @@ class Calendar_model extends CI_Model
         $q = $this->db->get('calendar');
 
         if ($q->num_rows() > 0) {
+            $data = array();
             foreach (($q->result_array()) as $row) {
                 $data[] = $row;
             }

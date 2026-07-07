@@ -4,6 +4,7 @@
 |------|-------|
 | Framework | CodeIgniter 3.1.13 |
 | Application | ElintPOS / SMA ERP |
+| **Fixes log** | **`PHP_UPGRADE_FIXES_LOG.md`** (Old → New, modules 1–9+) |
 | Total Controllers | ~75 |
 | Total Screens | ~900+ |
 | Total Files | ~21,900 |
@@ -19,7 +20,7 @@
 | Phase 1 | `system/` | CI 3.1.13 + PHP 8 session wrappers | Critical | Low | Done |
 | Phase 2 | `app/third_party/` | MPDF, PHPExcel, Stripe, Google SDK upgrade | Critical | High | Done |
 | Phase 3 | `app/` | Controllers, Models, `libraries/Sma.php` | High | Medium | In Progress |
-| Phase 4 | All modules | Module-wise screen testing | Medium | — | Pending |
+| Phase 4 | All modules | Module-wise screen testing | Medium | — | **In Progress** |
 
 ---
 
@@ -124,14 +125,123 @@
 | Sma library | `Sma.php` | `#[\AllowDynamicProperties]`, `&` → `&&` |
 | POS | `Pos.php`, `Pos_elite.php` | `end(explode())` → temp variable |
 
-#### Batch 3 — Pending
+#### Batch 3 — In Progress (Phase 4 screen testing)
 
-| Area | Action |
-|------|--------|
-| Auth testing | Login, OTP, user list, session |
-| Welcome / Settings | Screen load + form save |
-| POS / Sales | PDF, payments, DataTables |
-| Remaining controllers | Full module scan during Phase 4 |
+| Area | Status | Notes |
+|------|--------|-------|
+| **Module 1 — Auth** | **✅ Deep-links PASS** | 5/5 — profile, forgot password |
+| **Module 2 — Welcome** | **✅ Deep-links PASS** | 4/4 — dashboard, promotions, language |
+| **Module 3 — POS** | **✅ Deep-links PASS** | 11/11 — view, suspend resume, register modals |
+| **Module 4 — Sales** | **✅ Deep-links PASS** | 12/12 — view/edit/pdf/payments/return |
+| **Module 5 — Products** | **✅ Deep-links PASS** | 17/17 — print_barcodes/{id}, adjustments, stock count |
+| Remaining controllers | Pending | Full module scan during Phase 4 |
+| **Module 6 — Purchases** | **✅ Module complete** | Screen 13 + links 20+ + add + return submit |
+
+#### Phase 4 — Module Testing Log (2026-07-07)
+
+| Module | Screen | Load | Form/AJAX | Notes |
+|--------|--------|------|-----------|-------|
+| 1 Auth | Login | ✅ | ✅ | POST login → POS redirect, session OK |
+| 1 Auth | Register | ✅ | — | Guest redirect OK |
+| 1 Auth | Forgot Password | ✅ | — | Guest + logged-in OK |
+| 1 Auth | Change Password | ✅ | ⏳ | Form on profile `#cpassword` — save not tested |
+| 1 Auth | User List | ✅ | ⏳ | `/auth/users` 200 — DataTables AJAX pending |
+| 1 Auth | Profile | ✅ | ⏳ | `/auth/profile/1` 200 — save not tested |
+| 1 Auth | Create User | ✅ | ⏳ | Page loads — submit not tested |
+| 2 Welcome | Dashboard | ✅ | — | `/welcome` 200, 0 PHP warnings |
+| 2 Welcome | Menu includes | ✅ | — | Via header on dashboard/POS |
+| 3 POS | Main POS | ✅ | ✅ | `/pos` 200 |
+| 3 POS | Sales list | ✅ | ⏳ | `/pos/sales` 200 |
+| 3 POS | Open/Close register | ✅ | ⏳ | Both load — save not tested |
+| 3 POS | Today sales | ✅ | — | Fixed PHP 8 null/`str_replace` — now 200 |
+| 3 POS | POS elite | ✅ | ⏳ | `/pos_elite` 200 |
+| 3 POS | Product AJAX | ✅ | — | `sales/suggestions` + `getProductDataByCode` |
+| 3 POS | Cash sale submit | ✅ | ✅ | `phase4_pos_deep_test` — sale_id OK |
+| 3 POS | View bill | ✅ | — | `/pos/view/{id}` 200 |
+
+| 4 Sales | Sales list | ✅ | ✅ | `/sales` 200, `getSales` AJAX |
+| 4 Sales | Add sale | ✅ | ✅ | Submit → redirect `/sales`; view OK |
+| 4 Sales | All sale lists | ✅ | ⏳ | `/sales/all_sale_lists` 200 |
+| 4 Sales | Product AJAX | ✅ | — | `sales/suggestions` 200 |
+| 4 Sales | View sale | ✅ | — | `/sales/view/{id}` 200 |
+| 4 Sales | PDF | ✅ | — | `/sales/pdf/{id}` application/pdf |
+
+| 5 Products | Product list | ✅ | ✅ | `/products` 200, `getProducts` AJAX |
+| 5 Products | Add product | ✅ | ✅ | Submit → `/products`; view/edit/modal OK |
+| 5 Products | View/Edit/Modal | ✅ | — | Product id from getProducts |
+| 5 Products | Print barcodes | ✅ | — | `/products/print_barcodes` 200 |
+| 5 Products | Adjustments list | ✅ | — | `/products/quantity_adjustments` 200 |
+| 5 Products | suggestions AJAX | ✅ | — | `/products/suggestions?term=test` |
+| 5 Products | qa_suggestions (stock) | ✅ | — | ~700–980ms, warehouse 15 |
+| 5 Products | Stock adjustment +1 | ✅ | ✅ | POST `add_adjustment` → list redirect |
+| 5 Products | product_list AJAX | ✅ | — | ~700ms (JS blocks UI with async:false) |
+
+**POS test scripts:** `phase4_pos_test.php` (screens), `phase4_pos_deep_test.php` (sale flow), `phase4_pos_links_test.php` (deep links 11/11)
+
+**Sales test scripts:** `phase4_sales_test.php` (screens), `phase4_sales_deep_test.php` (sale submit), `phase4_sales_links_test.php` (deep links 12/12)
+
+**Products test scripts:** `phase4_products_test.php` (screens), `phase4_products_deep_test.php` (add submit), `phase4_products_stock_deep_test.php` (stock/timing), `phase4_products_links_test.php` (deep links 17/17)
+
+**Purchases test scripts:** `phase4_purchases_test.php` (screens 13/13), `phase4_purchases_deep_test.php` (add submit 6/6), `phase4_purchases_links_test.php` (deep links 20/20), `phase4_purchases_return_deep_test.php` (return 7/7)
+
+**Auth/Welcome links:** `phase4_auth_links_test.php` (5/5), `phase4_welcome_links_test.php` (4/4)
+
+**Shared lib:** `phase4_test_lib.php` (login, CSRF, DataTables ID helpers)
+
+**Test script:** `phase4_auth_test.php` — `php phase4_auth_test.php <user> <pass>`
+
+**Run all deep-link tests (modules 1–5):**
+```bash
+php phase4_auth_links_test.php Admin "Admin@554"
+php phase4_welcome_links_test.php Admin "Admin@554"
+php phase4_pos_links_test.php Admin "Admin@554"
+php phase4_sales_links_test.php Admin "Admin@554"
+php phase4_products_links_test.php Admin "Admin@554"
+php phase4_customers_test.php Admin "Admin@554"
+php phase4_customers_links_test.php Admin "Admin@554"
+php phase4_suppliers_billers_test.php Admin "Admin@554"
+php phase4_suppliers_billers_links_test.php Admin "Admin@554"
+```
+
+**Module 1 fixes (this session):** — details in [`PHP_UPGRADE_FIXES_LOG.md`](PHP_UPGRADE_FIXES_LOG.md) §Module 1
+
+**Module 2 fixes (Welcome scan):** — details in [`PHP_UPGRADE_FIXES_LOG.md`](PHP_UPGRADE_FIXES_LOG.md) §Module 2
+
+**Module 3 fixes (POS scan):** — details in [`PHP_UPGRADE_FIXES_LOG.md`](PHP_UPGRADE_FIXES_LOG.md) §Module 3
+
+**Module 4 fixes (Sales scan):** — [`PHP_UPGRADE_FIXES_LOG.md`](PHP_UPGRADE_FIXES_LOG.md) §Module 4
+
+**Module 4 deep test:** `phase4_sales_deep_test.php` — 6/6 PASS (suggestions → pending sale submit → view)
+
+**Module 5 fixes (Products scan):** — [`PHP_UPGRADE_FIXES_LOG.md`](PHP_UPGRADE_FIXES_LOG.md) §Module 5
+
+**Module 5 stock deep test:** `phase4_products_stock_deep_test.php` — 11/11 PASS (qa_suggestions ~700–980ms, adjustment +1 OK)
+
+**Module 6 fixes (Purchases scan):** — [`PHP_UPGRADE_FIXES_LOG.md`](PHP_UPGRADE_FIXES_LOG.md) §Module 6
+
+**Module 6 tests:** screen 13/13, deep-links 20/20, add deep 6/6, return deep 7/7 PASS
+
+**Module 7 fixes (Reports scan):** — [`PHP_UPGRADE_FIXES_LOG.md`](PHP_UPGRADE_FIXES_LOG.md) §Module 7
+
+**Module 7 tests:** screens ~69/71; deep-links ~22; deep AJAX 39/50 (see fixes log for open items)
+
+**Module 8 fixes (Customers scan):** — [`PHP_UPGRADE_FIXES_LOG.md`](PHP_UPGRADE_FIXES_LOG.md) §Module 8
+
+**Module 8 tests:** screen 10/10, deep-links 19/19 PASS
+
+**Module 9 fixes (Suppliers & Billers):** — [`PHP_UPGRADE_FIXES_LOG.md`](PHP_UPGRADE_FIXES_LOG.md) §Module 9
+
+**Module 9 tests:** screen 10/10, deep-links 14/14 PASS
+
+**Module 10 fixes (Quotes):** — [`PHP_UPGRADE_FIXES_LOG.md`](PHP_UPGRADE_FIXES_LOG.md) §Module 10
+
+**Module 10 tests:** screen 6/6, deep-links 10/10 PASS
+
+**Module 11 fixes (Transfers):** — [`PHP_UPGRADE_FIXES_LOG.md`](PHP_UPGRADE_FIXES_LOG.md) §Module 11
+
+**Module 11 tests:** screen 10/10, deep-links 12/12 PASS (`Transfersnew.php` deferred)
+
+**Stock/timing note:** Adjustment screen uses `async:false` on `product_list` + `qa_suggestions` in JS (`adjustments.js`) — causes UI “stuck” feel on large warehouses; server paths OK under 1s locally.
 
 ---
 
@@ -170,17 +280,17 @@
 
 | # | Submodule Group | Submodule | Controller | Screen Path | Priority | Test After Upgrade |
 |---|-----------------|-----------|------------|-------------|----------|-------------------|
-| 1 | Login | Login | Auth | `auth/login.php` | P1 | Login, captcha, session |
-| 2 | Login | Register | Auth | `auth/register.php` | P1 | New user creation |
-| 3 | Password | Forgot Password | Auth | `auth/reset_password.php` | P1 | Email OTP flow |
-| 4 | Password | Mobile Forgot OTP | Auth | `auth/verify_forgot_password_otp.php` | P1 | Mobile OTP |
-| 5 | Password | Mobile Reset | Auth | `auth/reset_password_mobile.php` | P1 | Password change |
-| 6 | Password | Change Password | Auth | `auth/change_password.php` | P1 | Password update |
-| 7 | Profile | Profile | Auth | `auth/profile.php` | P1 | User profile edit |
-| 8 | Users | Create User | Auth | `auth/create_user.php` | P1 | Admin user add |
-| 9 | Users | Deactivate User | Auth | `auth/deactivate_user.php` | P1 | User deactivate |
-| 10 | Users | User List | Auth | `auth/index.php` | P1 | DataTables list |
-| 11 | Users | Logout | Auth | redirect | P1 | Session destroy |
+| 1 | Login | Login | Auth | `auth/login.php` | P1 | ✅ Login PASS — redirects to POS |
+| 2 | Login | Register | Auth | `auth/register.php` | P1 | ✅ Guest load OK |
+| 3 | Password | Forgot Password | Auth | `auth/reset_password.php` | P1 | ✅ Load PASS |
+| 4 | Password | Mobile Forgot OTP | Auth | `auth/verify_forgot_password_otp.php` | P1 | ⏳ OTP flow not tested |
+| 5 | Password | Mobile Reset | Auth | `auth/reset_password_mobile.php` | P1 | ⏳ Session flow not tested |
+| 6 | Password | Change Password | Auth | `auth/change_password.php` | P1 | ✅ Form on profile — POST save pending |
+| 7 | Profile | Profile | Auth | `auth/profile.php` | P1 | ✅ Load PASS — edit save pending |
+| 8 | Users | Create User | Auth | `auth/create_user.php` | P1 | ✅ Load PASS — submit pending |
+| 9 | Users | Deactivate User | Auth | `auth/deactivate_user.php` | P1 | ⏳ Not tested |
+| 10 | Users | User List | Auth | `auth/index.php` | P1 | ✅ `/auth/users` PASS — DataTables pending |
+| 11 | Users | Logout | Auth | redirect | P1 | ⏳ Route OK — not exercised |
 
 ---
 
@@ -188,11 +298,11 @@
 
 | # | Submodule Group | Submodule | Controller | Screen Path | Priority | Test After Upgrade |
 |---|-----------------|-----------|------------|-------------|----------|-------------------|
-| 1 | Dashboard | Dashboard | Welcome | `dashboard.php` | P1 | Charts, widgets load |
-| 2 | Dashboard | Best Sellers | Welcome | `best_sellers.php` | P1 | Data display |
-| 3 | Dashboard | Calendar | Welcome | `calendar.php` | P1 | FullCalendar JS |
-| 4 | Menu | Admin Menu | Welcome | `admin_access_menu.php` | P1 | Menu permissions |
-| 5 | Menu | User Menu | Welcome | `user_access_menu.php` | P1 | Role-based menu |
+| 1 | Dashboard | Dashboard | Welcome | `dashboard.php` | P1 | ✅ Load PASS (logged-in) |
+| 2 | Dashboard | Best Sellers | Welcome | `best_sellers.php` | P1 | ✅ Widget on dashboard |
+| 3 | Dashboard | Calendar | Welcome | `calendar.php` | P1 | ⏳ May be Reports route |
+| 4 | Menu | Admin Menu | Welcome | `admin_access_menu.php` | P1 | ✅ Renders in header |
+| 5 | Menu | User Menu | Welcome | `user_access_menu.php` | P1 | ✅ Renders in header |
 
 ---
 

@@ -15,12 +15,14 @@
 <script type="text/javascript">
 
 <?php
+if (isset($_SERVER['HTTP_REFERER'])) {
 $lasturl = explode("/", $_SERVER['HTTP_REFERER']);
 $last_segment = count($lasturl) - 2;
-if ($lasturl[$last_segment] == 'edit_adjustment') {
+if (isset($lasturl[$last_segment]) && $lasturl[$last_segment] == 'edit_adjustment') {
     ?>
         localStorage.clear();
-<?php } ?>
+<?php }
+} ?>
     var count = 1, an = 1, product_variant = 0, shipping = 0, product_tax = 0, total = 0;
     var type_opt = {'addition': '<?= lang('addition'); ?>', 'subtraction': '<?= lang('subtraction'); ?>'};
     var wp_id = 0;

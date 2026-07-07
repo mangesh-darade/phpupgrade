@@ -16,7 +16,7 @@ class Purchases extends MY_Controller {
         }
         if ($this->Customer) {
             $this->session->set_flashdata('warning', lang('access_denied'));
-            redirect($_SERVER["HTTP_REFERER"]);
+            redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('purchases'));
         }
         
         $this->lang->load('purchases', $this->Settings->user_language);
@@ -257,22 +257,28 @@ class Purchases extends MY_Controller {
 
         $this->data['error'] = (validation_errors()) ? validation_errors() : $this->session->flashdata('error');
         $inv = $this->purchases_model->getPurchaseByID($purchase_id);
+        if (!$inv) {
+            $this->session->set_flashdata('error', lang('no_purchase_selected'));
+            redirect('purchases');
+        }
         if (!$this->session->userdata('view_right')) {
             $this->sma->view_rights($inv->created_by, true);
         }
         $_PID = $this->Settings->default_printer;
         $this->data['default_printer'] = $this->site->defaultPrinterOption($_PID);
-        if ($this->data['default_printer']->tax_classification_view):
+        if (!empty($this->data['default_printer']) && $this->data['default_printer']->tax_classification_view):
             $inv->rows_tax = $this->purchases_model->getAllTaxItems($inv->id, $inv->return_id);
         endif;
         $this->data['biller'] = $this->site->getCompanyByID($this->Settings->default_biller);
         $this->data['taxItems'] = $this->purchases_model->getAllTaxItemsGroup($purchase_id, $inv->return_id);
         $this->data['rows'] = $this->purchases_model->getAllPurchaseItems($purchase_id);
+        if (!empty($this->data['rows'])) {
         foreach ($this->data['rows'] as $row) {
             if (!empty($row->shade_id)) {
                 $colors = $this->purchases_model->getProductOptionByID($row->shade_id);
                 $row->shade_name= $colors->name;
             }
+        }
         }
         $this->data['supplier'] = $this->site->getCompanyByID($inv->supplier_id);
         $this->data['warehouse'] = $this->site->getWarehouseByID($inv->warehouse_id);
@@ -282,11 +288,13 @@ class Purchases extends MY_Controller {
         $this->data['updated_by'] = $inv->updated_by ? $this->site->getUser($inv->updated_by) : null;
         $this->data['return_purchase'] = $inv->return_id ? $this->purchases_model->getPurchaseByID($inv->return_id) : NULL;
         $this->data['return_rows'] = $inv->return_id ? $this->purchases_model->getAllPurchaseItems($inv->return_id) : NULL;
+         if (!empty($this->data['return_rows'])) {
          foreach ($this->data['return_rows'] as $row) {
             if (!empty($row->shade_id)) {
                 $colors = $this->purchases_model->getProductOptionByID($row->shade_id);
                 $row->shade_name= $colors->name;
             }
+        }
         }
           // Screen: Purchase Modal Print View (modal_view_print)
             // Used by: Generate Variant PO quick print flow (single-tab chaining)
@@ -320,21 +328,27 @@ class Purchases extends MY_Controller {
         }
         $this->data['error'] = (validation_errors()) ? validation_errors() : $this->session->flashdata('error');
         $inv = $this->purchases_model->getPurchaseByID($purchase_id);
+        if (!$inv) {
+            $this->session->set_flashdata('error', lang('no_purchase_selected'));
+            redirect('purchases');
+        }
         if (!$this->session->userdata('view_right')) {
             $this->sma->view_rights($inv->created_by);
         }
         $_PID = $this->Settings->default_printer;
         $this->data['default_printer'] = $this->site->defaultPrinterOption($_PID);
-        if ($this->data['default_printer']->tax_classification_view):
+        if (!empty($this->data['default_printer']) && $this->data['default_printer']->tax_classification_view):
             $inv->rows_tax = $this->purchases_model->getAllTaxItems($inv->id, $inv->return_id);
         endif;
         $this->data['biller'] = $this->site->getCompanyByID($this->Settings->default_biller);
         $this->data['rows'] = $this->purchases_model->getAllPurchaseItems($purchase_id);
+        if (!empty($this->data['rows'])) {
         foreach ($this->data['rows'] as $row) {
             if (!empty($row->shade_id)) {
                 $colors = $this->purchases_model->getProductOptionByID($row->shade_id);
                 $row->shade_name= $colors->name;
             }
+        }
         }
         $this->data['supplier'] = $this->site->getCompanyByID($inv->supplier_id);
         $this->data['warehouse'] = $this->site->getWarehouseByID($inv->warehouse_id);
@@ -377,6 +391,10 @@ class Purchases extends MY_Controller {
 
         $this->data['error'] = (validation_errors()) ? validation_errors() : $this->session->flashdata('error');
         $inv = $this->purchases_model->getPurchaseByID($purchase_id);
+        if (!$inv) {
+            $this->session->set_flashdata('error', lang('no_purchase_selected'));
+            redirect('purchases');
+        }
 
         //$this->data['payments'] = $this->purchases_model->getPaymentsForPurchase($purchase_id);
 
@@ -385,17 +403,19 @@ class Purchases extends MY_Controller {
           } */
         $_PID = $this->Settings->default_printer;
         $this->data['default_printer'] = $this->site->defaultPrinterOption($_PID);
-        if ($this->data['default_printer']->tax_classification_view):
+        if (!empty($this->data['default_printer']) && $this->data['default_printer']->tax_classification_view):
             $inv->rows_tax = $this->purchases_model->getAllTaxItems($inv->id, $inv->return_id);
         endif;
         $this->data['biller'] = $this->site->getCompanyByID($this->Settings->default_biller);
         $this->data['taxItems'] = $this->purchases_model->getAllTaxItemsGroup($purchase_id, $inv->return_id);
         $this->data['rows'] = $this->purchases_model->getAllPurchaseItems($purchase_id);
+        if (!empty($this->data['rows'])) {
         foreach ($this->data['rows'] as $row) {
             if (!empty($row->shade_id)) {
                 $colors = $this->purchases_model->getProductOptionByID($row->shade_id);
                 $row->shade_name= $colors->name;
             }
+        }
         }
         $this->data['supplier'] = $this->site->getCompanyByID($inv->supplier_id);
         $this->data['warehouse'] = $this->site->getWarehouseByID($inv->warehouse_id);
@@ -429,23 +449,27 @@ class Purchases extends MY_Controller {
             }
             $this->data['taxItems'] = $this->purchases_model->getAllTaxItemsGroup($purchase_id, $inv->return_id);
             $this->data['rows'] = $this->purchases_model->getAllPurchaseItems($purchase_id);
+            if (!empty($this->data['rows'])) {
             foreach ($this->data['rows'] as $row) {
             if (!empty($row->shade_id)) {
                 $colors = $this->purchases_model->getProductOptionByID($row->shade_id);
                 $row->shade_name= $colors->name;
             }
         }
+            }
             $this->data['supplier'] = $this->site->getCompanyByID($inv->supplier_id);
             $this->data['warehouse'] = $this->site->getWarehouseByID($inv->warehouse_id);
             $this->data['created_by'] = $this->site->getUser($inv->created_by);
             $this->data['inv'] = $inv;
             $this->data['return_purchase'] = $inv->return_id ? $this->purchases_model->getPurchaseByID($inv->return_id) : NULL;
             $this->data['return_rows'] = $inv->return_id ? $this->purchases_model->getAllPurchaseItems($inv->return_id) : NULL;
+            if (!empty($this->data['return_rows'])) {
             foreach ($this->data['return_rows'] as $row) {
                 if (!empty($row->shade_id)) {
-                    $colors = $this->sales_model->getProductOptionByID($row->shade_id);
+                    $colors = $this->purchases_model->getProductOptionByID($row->shade_id);
                     $row->shade_name= $colors->name;
                 }
+            }
             }
             $inv_html = $this->load->view($this->theme . 'purchases/pdf', $this->data, true);
             if (!$this->Settings->barcode_img) {
@@ -509,7 +533,7 @@ class Purchases extends MY_Controller {
 
             $this->data['error'] = (validation_errors() ? validation_errors() : $this->session->flashdata('error'));
             $this->session->set_flashdata('error', $this->data['error']);
-            redirect($_SERVER["HTTP_REFERER"]);
+            redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('purchases'));
         }
 
         if ($this->form_validation->run() == true && $this->sma->send_email($to, $subject, $message, null, null, $attachment, $cc, $bcc)) {
@@ -520,7 +544,7 @@ class Purchases extends MY_Controller {
             }
             $this->session->set_flashdata('message', $this->lang->line("email_sent_msg"));
             //redirect("purchases");
-            redirect($_SERVER["HTTP_REFERER"]);
+            redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('purchases'));
         } else {
 
             $this->data['error'] = (validation_errors() ? validation_errors() : $this->session->flashdata('error'));
@@ -594,7 +618,7 @@ class Purchases extends MY_Controller {
             $product_discount = 0;
             $order_discount = 0;
             $percentage = '%';
-            $i = sizeof($_POST['product']);
+            $i = isset($_POST['product']) ? sizeof($_POST['product']) : 0;
             $total_cgst = $total_sgst = $total_igst = 0;
             for ($r = 0; $r < $i; $r++) {
                 
@@ -664,7 +688,7 @@ class Purchases extends MY_Controller {
                         $today = date('Y-m-d');
                         if ($item_expiry <= $today) {
                             $this->session->set_flashdata('error', lang('product_expiry_date_issue') . ' (' . $product_details->name . ')');
-                            redirect($_SERVER["HTTP_REFERER"]);
+                            redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('purchases'));
                         }
                     }
                     // $unit_cost = $real_unit_cost;
@@ -868,7 +892,7 @@ class Purchases extends MY_Controller {
                 if (!$this->upload->do_upload('document')) {
                     $error = $this->upload->display_errors();
                     $this->session->set_flashdata('error', $error);
-                    redirect($_SERVER["HTTP_REFERER"]);
+                    redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('purchases'));
                 }
                 $photo = $this->upload->file_name;
                 $data['attachment'] = $photo;
@@ -1073,10 +1097,14 @@ class Purchases extends MY_Controller {
             $id = $this->input->get('id');
         }
         $inv = $this->purchases_model->getPurchaseByID($id);
+        if (!$inv) {
+            $this->session->set_flashdata('error', lang('no_purchase_selected'));
+            redirect('purchases');
+        }
             
         if(!$this->site->isWarehouseActive($inv->warehouse_id)){
             $this->session->set_flashdata('error', 'Purchase warehouse is inactive. Can not modified purchase.');
-            redirect($_SERVER["HTTP_REFERER"]);
+            redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('purchases'));
         }
         if ($inv->status == 'returned' || $inv->return_id || $inv->return_purchase_ref) {
             $this->session->set_flashdata('error', lang('purchase_x_action'));
@@ -1127,7 +1155,7 @@ class Purchases extends MY_Controller {
             $percentage         = '%';
             $purchase_status    = false;
             $total_cgst = $total_sgst = $total_igst = 0;
-            $i = sizeof($_POST['product']);
+            $i = isset($_POST['product']) ? sizeof($_POST['product']) : 0;
             
             for ($r = 0; $r < $i; $r++) {
                 
@@ -1197,7 +1225,7 @@ class Purchases extends MY_Controller {
                         $item_status = 'received';
                     } elseif ($quantity_received > $item_quantity) {
                         $this->session->set_flashdata('error', lang("received_more_than_ordered"));
-                        redirect($_SERVER["HTTP_REFERER"]);
+                        redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('purchases'));
                     }
                     $balance_qty = $quantity_received - ($ordered_quantity - $quantity_balance);
             
@@ -1432,7 +1460,7 @@ class Purchases extends MY_Controller {
                 if (!$this->upload->do_upload('document')) {
                     $error = $this->upload->display_errors();
                     $this->session->set_flashdata('error', $error);
-                    redirect($_SERVER["HTTP_REFERER"]);
+                    redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('purchases'));
                 }
                 $photo = $this->upload->file_name;
                 $data['attachment'] = $photo;
@@ -1461,10 +1489,12 @@ class Purchases extends MY_Controller {
             if ($this->Settings->disable_editing) {
                 if ($this->data['inv']->date <= date('Y-m-d', strtotime('-' . $this->Settings->disable_editing . ' days'))) {
                     $this->session->set_flashdata('error', sprintf(lang("purchase_x_edited_older_than_x_days"), $this->Settings->disable_editing));
-                    redirect($_SERVER["HTTP_REFERER"]);
+                    redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('purchases'));
                 }
             }
+            $pr = array();
             $inv_items = $this->purchases_model->getAllPurchaseItems($id, 'product_code');  //second parameter order by name
+            if (!empty($inv_items)) {
             krsort($inv_items);
             $c = rand(100000, 9999999);
             
@@ -1548,6 +1578,7 @@ class Purchases extends MY_Controller {
                 $pr[$ri] = array('id' => $c, 'item_id' => $row_id, 'label' => $row->name . " (" . $row->code . ")",
                     'row' => $row, 'tax_rate' => $tax_rate, 'units' => $units, 'options' => $options, 'batchs' => $batchoption, 'option_batches'=> $productbatches );
                 $c++;
+            }
             }
 
             $this->data['inv_items'] = json_encode($pr);
@@ -1705,15 +1736,15 @@ class Purchases extends MY_Controller {
                     // Numeric validations
                     if (!is_numeric($net_unit_cost)) {
                         $this->session->set_flashdata('error', "Line {$rw}: Net Unit Cost must be a numeric value.");
-                        redirect($_SERVER["HTTP_REFERER"]);
+                        redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('purchases'));
                     }
                     if ($item_price !== NULL && !is_numeric($item_price)) {
                         $this->session->set_flashdata('error', "Line {$rw}: Price must be a numeric value.");
-                        redirect($_SERVER["HTTP_REFERER"]);
+                        redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('purchases'));
                     }
                     if ($mrp !== NULL && !is_numeric($mrp)) {
                         $this->session->set_flashdata('error', "Line {$rw}: MRP must be a numeric value.");
-                        redirect($_SERVER["HTTP_REFERER"]);
+                        redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('purchases'));
                     }
 
                     // Batch number validation based on batch setting
@@ -1722,13 +1753,13 @@ class Purchases extends MY_Controller {
                     // If batch is enabled (setting 1 or 2) and batch number is empty, show error
                     if (($batch_setting == 1 || $batch_setting == 2) && empty($item_batch_number)) {
                         $this->session->set_flashdata('error', "Line {$rw}: Batch number is required for product '{$item_code}'");
-                        redirect($_SERVER["HTTP_REFERER"]);
+                        redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('purchases'));
                     }
                     
                     // If batch is disabled (setting 0) and batch number is provided, show error
                     if ($batch_setting == 0 && !empty($item_batch_number)) {
                         $this->session->set_flashdata('error', "Line {$rw}: Batch number is not allowed as batch setting is disabled for product '{$item_code}'");
-                        redirect($_SERVER["HTTP_REFERER"]);
+                        redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('purchases'));
                     }
                     
                     // Validate expiry date (must be today or future date)
@@ -1736,34 +1767,34 @@ class Purchases extends MY_Controller {
                         $today = date('Y-m-d');
                         if (strtotime($expiry) < strtotime($today)) {
                             $this->session->set_flashdata('error', "Line {$rw}: Expiry date must be today or a future date.");
-                            redirect($_SERVER["HTTP_REFERER"]);
+                            redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('purchases'));
                         }
                     }
 
                     // Negative value validations
                     if ($net_unit_cost < 0) {
                         $this->session->set_flashdata('error', "Line {$rw}: Net Unit Cost cannot be negative.");
-                        redirect($_SERVER["HTTP_REFERER"]);
+                        redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('purchases'));
                     }
                     if ($quantity < 0) {
                         $this->session->set_flashdata('error', "Line {$rw}: Quantity cannot be negative.");
-                        redirect($_SERVER["HTTP_REFERER"]);
+                        redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('purchases'));
                     }
                     if ($item_tax_rate !== NULL && $item_tax_rate < 0) {
                         $this->session->set_flashdata('error', "Line {$rw}: Tax rate cannot be negative.");
-                        redirect($_SERVER["HTTP_REFERER"]);
+                        redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('purchases'));
                     }
                     if ($item_discount !== NULL && $item_discount < 0) {
                         $this->session->set_flashdata('error', "Line {$rw}: Discount cannot be negative.");
-                        redirect($_SERVER["HTTP_REFERER"]);
+                        redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('purchases'));
                     }
                     if ($item_price !== NULL && $item_price < 0) {
                         $this->session->set_flashdata('error', "Line {$rw}: Price cannot be negative.");
-                        redirect($_SERVER["HTTP_REFERER"]);
+                        redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('purchases'));
                     }
                     if ($mrp !== NULL && $mrp < 0) {
                         $this->session->set_flashdata('error', "Line {$rw}: MRP cannot be negative.");
-                        redirect($_SERVER["HTTP_REFERER"]);
+                        redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('purchases'));
                     }
                     
                     $cgst = $sgst = $igst = $gst_rate = 0;          
@@ -1781,7 +1812,7 @@ class Purchases extends MY_Controller {
                                 $item_option = $this->purchases_model->getProductVariantByName($variant, $product_id);
                                 if (!$item_option) {
                                     $this->session->set_flashdata('error', lang("pr_not_found") . " ( " . $product_details->name . " - " . $variant . " ). " . lang("line_no") . " " . $rw);
-                                    redirect($_SERVER["HTTP_REFERER"]);
+                                    redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('purchases'));
                                 }
                             } else {
                                 $item_option = json_decode('{}');
@@ -1824,7 +1855,7 @@ class Purchases extends MY_Controller {
                                 if (!$batch) {
                                     $this->session->set_flashdata('error', "Line {$rw}: Batch number '{$csv_pr['batch_number']}' not found for product '{$product_details->name}'" . 
                                         ($variant ? " (Variant: {$variant})" : ""));
-                                    redirect($_SERVER["HTTP_REFERER"]);
+                                    redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('purchases'));
                                 }
                             }
                 
@@ -1869,7 +1900,7 @@ class Purchases extends MY_Controller {
                                     $pr_item_tax = $this->sma->formatDecimal(($item_tax * $item_quantity), 4);
                                 } else {
                                     $this->session->set_flashdata('error', lang("tax_not_found") . " ( " . $item_tax_rate . " ). " . lang("line_no") . " " . $rw);
-                                    redirect($_SERVER["HTTP_REFERER"]);
+                                    redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('purchases'));
                                 }
                             } elseif ($product_details->tax_rate) {
                                 $pr_tax = $product_details->tax_rate;
@@ -1988,7 +2019,7 @@ class Purchases extends MY_Controller {
                             $str = $str.", ".$csv_pr['code']."(Line No:".$rw.")";
                             $flag =1;
                             // $this->session->set_flashdata('error', $this->lang->line("pr_not_found") . " (" . $str . "). " . $this->lang->line("line_no") . " " . $rw);
-                            // redirect($_SERVER["HTTP_REFERER"]);
+                            // redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('purchases'));
                         }
                         $rw++;
                         
@@ -2009,7 +2040,7 @@ class Purchases extends MY_Controller {
                 if($flag == 1)
                 {
                   $this->session->set_flashdata('error', $this->lang->line("pr_not_found") . " (" . substr($str,2) . "). ");// . $this->lang->line("line_no") . " " . $rw);
-                  redirect($_SERVER["HTTP_REFERER"]);  
+                  redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('purchases'));  
                 }
             }//if File Uploaded
 
@@ -2091,7 +2122,7 @@ class Purchases extends MY_Controller {
                 if (!$this->upload->do_upload('document')) {
                     $error = $this->upload->display_errors();
                     $this->session->set_flashdata('error', $error);
-                    redirect($_SERVER["HTTP_REFERER"]);
+                    redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('purchases'));
                 }
                 $photo = $this->upload->file_name;
                 $data['attachment'] = $photo;
@@ -2172,7 +2203,7 @@ class Purchases extends MY_Controller {
         if($purchase->status=="partial" || $purchase->status=="received") {
             
             $this->session->set_flashdata('error', 'The purchase could not delete because the item had already been added to stocks');
-            redirect($_SERVER["HTTP_REFERER"]);
+            redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('purchases'));
         } else {
             $this->sma->storeDeletedData('purchases', 'id', $id);
             if ($this->purchases_model->deletePurchase($id)) {
@@ -2181,7 +2212,7 @@ class Purchases extends MY_Controller {
                     die();
                 }
                 $this->session->set_flashdata('message', lang('purchase_deleted'));
-                redirect($_SERVER["HTTP_REFERER"]);
+                redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('purchases'));
             }
         }
     }
@@ -2384,7 +2415,7 @@ class Purchases extends MY_Controller {
       public function purchase_actions() {
         if (!$this->Owner && !$this->GP['bulk_actions']) {
             $this->session->set_flashdata('warning', lang('access_denied'));
-            redirect($_SERVER["HTTP_REFERER"]);
+            redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('purchases'));
         }
 
         $this->form_validation->set_rules('form_action', lang("form_action"), 'required');
@@ -2400,7 +2431,7 @@ class Purchases extends MY_Controller {
                         $this->purchases_model->deletePurchase($id);
                     }
                     $this->session->set_flashdata('message', $this->lang->line("purchases_deleted"));
-                    redirect($_SERVER["HTTP_REFERER"]);
+                    redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('purchases'));
                 } elseif ($this->input->post('form_action') == 'combine') {
 
                     $html = $this->combine_pdf($_POST['val']);
@@ -2468,7 +2499,7 @@ class Purchases extends MY_Controller {
                         return $objWriter->save('php://output');
                     }
 
-                    redirect($_SERVER["HTTP_REFERER"]);
+                    redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('purchases'));
                 }elseif ($this->input->post('form_action') == 'export_invoice_to_excel') {
                       $this->load->library('excel');
                     $this->excel->setActiveSheetIndex(0);
@@ -2610,11 +2641,11 @@ class Purchases extends MY_Controller {
                 }
             } else {
                 $this->session->set_flashdata('error', $this->lang->line("no_purchase_selected"));
-                redirect($_SERVER["HTTP_REFERER"]);
+                redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('purchases'));
             }
         } else {
             $this->session->set_flashdata('error', validation_errors());
-            redirect($_SERVER["HTTP_REFERER"]);
+            redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('purchases'));
         }
     }
 
@@ -2624,13 +2655,25 @@ class Purchases extends MY_Controller {
 
         $this->data['payments'] = $this->purchases_model->getPurchasePayments($id);
         $this->data['inv'] = $this->purchases_model->getPurchaseByID($id);
+        if (!$this->data['inv']) {
+            echo lang('no_purchase_selected');
+            return;
+        }
         $this->load->view($this->theme . 'purchases/payments', $this->data);
     }
 
     public function payment_note($id = null) {
         $this->sma->checkPermissions('payments', true);
         $payment = $this->purchases_model->getPaymentByID($id);
+        if (!$payment) {
+            echo lang('no_purchase_selected');
+            return;
+        }
         $inv = $this->purchases_model->getPurchaseByID($payment->purchase_id);
+        if (!$inv) {
+            echo lang('no_purchase_selected');
+            return;
+        }
         $this->data['supplier'] = $this->site->getCompanyByID($inv->supplier_id);
         $this->data['warehouse'] = $this->site->getWarehouseByID($inv->warehouse_id);
         $this->data['inv'] = $inv;
@@ -2647,6 +2690,11 @@ class Purchases extends MY_Controller {
             $id = $this->input->get('id');
         }
         $purchase = $this->purchases_model->getPurchaseByID($id);
+        if (!$purchase) {
+            $this->session->set_flashdata('error', lang('no_purchase_selected'));
+            $this->sma->md();
+            return;
+        }
         if ($purchase->payment_status == 'paid' && $purchase->grand_total == $purchase->paid) {
             $this->session->set_flashdata('error', lang("purchase_already_paid"));
             $this->sma->md();
@@ -2694,7 +2742,7 @@ class Purchases extends MY_Controller {
                 if (!$this->upload->do_upload()) {
                     $error = $this->upload->display_errors();
                     $this->session->set_flashdata('error', $error);
-                    redirect($_SERVER["HTTP_REFERER"]);
+                    redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('purchases'));
                 }
                 $photo = $this->upload->file_name;
                 $payment['attachment'] = $photo;
@@ -2703,12 +2751,12 @@ class Purchases extends MY_Controller {
             //$this->sma->print_arrays($payment);
         } elseif ($this->input->post('add_payment')) {
             $this->session->set_flashdata('error', validation_errors());
-            redirect($_SERVER["HTTP_REFERER"]);
+            redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('purchases'));
         }
 
         if ($this->form_validation->run() == true && $this->purchases_model->addPayment($payment)) {
             $this->session->set_flashdata('message', lang("payment_added"));
-            redirect($_SERVER["HTTP_REFERER"]);
+            redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('purchases'));
         } else {
 
             $this->data['error'] = (validation_errors() ? validation_errors() : $this->session->flashdata('error'));
@@ -2763,7 +2811,7 @@ class Purchases extends MY_Controller {
                 if (!$this->upload->do_upload()) {
                     $error = $this->upload->display_errors();
                     $this->session->set_flashdata('error', $error);
-                    redirect($_SERVER["HTTP_REFERER"]);
+                    redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('purchases'));
                 }
                 $photo = $this->upload->file_name;
                 $payment['attachment'] = $photo;
@@ -2772,7 +2820,7 @@ class Purchases extends MY_Controller {
             //$this->sma->print_arrays($payment);
         } elseif ($this->input->post('edit_payment')) {
             $this->session->set_flashdata('error', validation_errors());
-            redirect($_SERVER["HTTP_REFERER"]);
+            redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('purchases'));
         }
 
         if ($this->form_validation->run() == true && $this->purchases_model->updatePayment($id, $payment)) {
@@ -2800,7 +2848,7 @@ class Purchases extends MY_Controller {
         if ($this->purchases_model->deletePayment($id)) {
             //echo lang("payment_deleted");
             $this->session->set_flashdata('message', lang("payment_deleted"));
-            redirect($_SERVER["HTTP_REFERER"]);
+            redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('purchases'));
         }
     }
 
@@ -2909,7 +2957,7 @@ class Purchases extends MY_Controller {
                 if (!$this->upload->do_upload()) {
                     $error = $this->upload->display_errors();
                     $this->session->set_flashdata('error', $error);
-                    redirect($_SERVER["HTTP_REFERER"]);
+                    redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('purchases'));
                 }
                 $photo = $this->upload->file_name;
                 $data['attachment'] = $photo;
@@ -2970,7 +3018,7 @@ class Purchases extends MY_Controller {
                 if (!$this->upload->do_upload()) {
                     $error = $this->upload->display_errors();
                     $this->session->set_flashdata('error', $error);
-                    redirect($_SERVER["HTTP_REFERER"]);
+                    redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('purchases'));
                 }
                 $photo = $this->upload->file_name;
                 $data['attachment'] = $photo;
@@ -2979,7 +3027,7 @@ class Purchases extends MY_Controller {
             //$this->sma->print_arrays($data);
         } elseif ($this->input->post('edit_expense')) {
             $this->session->set_flashdata('error', validation_errors());
-            redirect($_SERVER["HTTP_REFERER"]);
+            redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('purchases'));
         }
 
         if ($this->form_validation->run() == true && $this->purchases_model->updateExpense($id, $data)) {
@@ -3031,7 +3079,7 @@ class Purchases extends MY_Controller {
     public function expense_actions() {
         if (!$this->Owner && !$this->GP['bulk_actions']) {
             $this->session->set_flashdata('warning', lang('access_denied'));
-            redirect($_SERVER["HTTP_REFERER"]);
+            redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('purchases'));
         }
 
         $this->form_validation->set_rules('form_action', lang("form_action"), 'required');
@@ -3044,7 +3092,7 @@ class Purchases extends MY_Controller {
                         $this->purchases_model->deleteExpense($id);
                     }
                     $this->session->set_flashdata('message', $this->lang->line("expenses_deleted"));
-                    redirect($_SERVER["HTTP_REFERER"]);
+                    redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('purchases'));
                 }
 
                 if ($this->input->post('form_action') == 'export_excel' || $this->input->post('form_action') == 'export_pdf') {
@@ -3126,15 +3174,15 @@ class Purchases extends MY_Controller {
                         return $objWriter->save('php://output');
                     }
 
-                    redirect($_SERVER["HTTP_REFERER"]);
+                    redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('purchases'));
                 }
             } else {
                 $this->session->set_flashdata('error', $this->lang->line("no_expense_selected"));
-                redirect($_SERVER["HTTP_REFERER"]);
+                redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('purchases'));
             }
         } else {
             $this->session->set_flashdata('error', validation_errors());
-            redirect($_SERVER["HTTP_REFERER"]);
+            redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('purchases'));
         }
     }
 
@@ -3146,8 +3194,12 @@ class Purchases extends MY_Controller {
         }
         $this->data['error'] = (validation_errors()) ? validation_errors() : $this->session->flashdata('error');
         $inv = $this->purchases_model->getReturnByID($id);
+        if (!$inv) {
+            $this->session->set_flashdata('error', lang('no_purchase_selected'));
+            redirect('purchases');
+        }
         if (!$this->session->userdata('view_right')) {
-            $this->sma->view_rights($inv->created_by);
+            $this->sma->view_rights($inv->created_by, true);
         }
         $this->data['barcode'] = "<img src='" . site_url('products/gen_barcode/' . $inv->reference_no) . "' alt='" . $inv->reference_no . "' class='pull-left' />";
         $this->data['supplier'] = $this->site->getCompanyByID($inv->supplier_id);
@@ -3156,6 +3208,9 @@ class Purchases extends MY_Controller {
         $this->data['warehouse'] = $this->site->getWarehouseByID($inv->warehouse_id);
         $this->data['inv'] = $inv;
         $this->data['rows'] = $this->purchases_model->getAllReturnItems($id);
+        if (!is_array($this->data['rows'])) {
+            $this->data['rows'] = array();
+        }
         $this->data['purchase'] = $this->purchases_model->getPurchaseByID($inv->purchase_id);
         $this->load->view($this->theme . 'purchases/view_return', $this->data);
     }
@@ -3168,9 +3223,13 @@ class Purchases extends MY_Controller {
         }
 
         $purchase = $this->purchases_model->getPurchaseByID($id);
+        if (!$purchase) {
+            $this->session->set_flashdata('error', lang('no_purchase_selected'));
+            redirect('purchases');
+        }
         if ($purchase->return_id) {
             $this->session->set_flashdata('error', lang("purchase_already_returned"));
-            redirect($_SERVER["HTTP_REFERER"]);
+            redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('purchases'));
         }
         $this->form_validation->set_rules('return_surcharge', lang("return_surcharge"), 'required');
 
@@ -3408,7 +3467,7 @@ class Purchases extends MY_Controller {
                 if (!$this->upload->do_upload('document')) {
                     $error = $this->upload->display_errors();
                     $this->session->set_flashdata('error', $error);
-                    redirect($_SERVER["HTTP_REFERER"]);
+                    redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('purchases'));
                 }
                 $photo = $this->upload->file_name;
                 $data['attachment'] = $photo;
@@ -3428,15 +3487,17 @@ class Purchases extends MY_Controller {
             $status = $this->data['inv']->status;
             if ($this->data['inv']->status != 'received' && $this->data['inv']->status != 'partial') {
                 $this->session->set_flashdata('error', lang("purchase_status_x_received"));
-                redirect($_SERVER["HTTP_REFERER"]);
+                redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('purchases'));
             }
             if ($this->Settings->disable_editing) {
                 if ($this->data['inv']->date <= date('Y-m-d', strtotime('-' . $this->Settings->disable_editing . ' days'))) {
                     $this->session->set_flashdata('error', lang("purchase_x_cant_return_older_than_x_days"));
-                    redirect($_SERVER["HTTP_REFERER"]);
+                    redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('purchases'));
                 }
             }
+            $pr = array();
             $inv_items = $this->purchases_model->getAllPurchaseItems($id);
+            if (!empty($inv_items)) {
             krsort($inv_items);
 
             $c = rand(100000, 9999999);
@@ -3488,6 +3549,7 @@ class Purchases extends MY_Controller {
                 $pr[$ri] = array('id' => $c, 'item_id' => $row->id, 'label' => $row->name . " (" . $row->code . ")", 'row' => $row, 'units' => $units, 'tax_rate' => $tax_rate, 'options' => $options, 'options_color' => $options_color);
 
                 $c++;
+            }
             }
 
             $this->data['inv_items'] = json_encode($pr);
@@ -3541,6 +3603,10 @@ class Purchases extends MY_Controller {
         } else {
 
             $this->data['inv'] = $this->purchases_model->getPurchaseByID($id);
+            if (!$this->data['inv']) {
+                echo lang('no_purchase_selected');
+                return;
+            }
             $this->data['returned'] = FALSE;
             if ($this->data['inv']->status == 'returned' || $this->data['inv']->return_id) {
                 $this->data['returned'] = TRUE;
@@ -3807,7 +3873,7 @@ class Purchases extends MY_Controller {
             $product_discount = 0;
             $order_discount = 0;
             $percentage = '%';
-            $i = sizeof($_POST['product']);
+            $i = isset($_POST['product']) ? sizeof($_POST['product']) : 0;
             $total_cgst = $total_sgst = $total_igst = 0;
             for ($r = 0; $r < $i; $r++) {
                 $item_code = $_POST['product'][$r];
@@ -3864,7 +3930,7 @@ class Purchases extends MY_Controller {
                         $today = date('Y-m-d');
                         if ($item_expiry <= $today) {
                             $this->session->set_flashdata('error', lang('product_expiry_date_issue') . ' (' . $product_details->name . ')');
-                            redirect($_SERVER["HTTP_REFERER"]);
+                            redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('purchases'));
                         }
                     }
                     $pr_discount = 0;
@@ -4069,7 +4135,7 @@ class Purchases extends MY_Controller {
                 if (!$this->upload->do_upload('document')) {
                     $error = $this->upload->display_errors();
                     $this->session->set_flashdata('error', $error);
-                    redirect($_SERVER["HTTP_REFERER"]);
+                    redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('purchases'));
                 }
                 $photo = $this->upload->file_name;
                 $data['attachment'] = $photo;
@@ -4176,7 +4242,7 @@ class Purchases extends MY_Controller {
                 $this->db->trans_complete();
                 if ($this->db->trans_status() === false) {
                     $this->session->set_flashdata('error', 'Transaction failed while creating request/transfer.');
-                    redirect($_SERVER["HTTP_REFERER"]);
+                    redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('purchases'));
                 
 
                 }
@@ -4194,7 +4260,7 @@ class Purchases extends MY_Controller {
             } else {
                 $this->db->trans_rollback();
                 $this->session->set_flashdata('error', 'Failed to create Request/Transfer for this Purchase.');
-                redirect($_SERVER["HTTP_REFERER"]);
+                redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('purchases'));
             }
         } else {
             if ($quote_id || $purchase_id) {
@@ -5367,7 +5433,7 @@ class Purchases extends MY_Controller {
             
         if(!$this->site->isWarehouseActive($inv->warehouse_id)){
             $this->session->set_flashdata('error', 'Purchase warehouse is inactive. Can not modified purchase.');
-            redirect($_SERVER["HTTP_REFERER"]);
+            redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('purchases'));
         }
         if ($inv->status == 'returned' || $inv->return_id || $inv->return_purchase_ref) {
             $this->session->set_flashdata('error', lang('purchase_x_action'));
@@ -5415,7 +5481,7 @@ class Purchases extends MY_Controller {
             $percentage         = '%';
             $purchase_status    = false;
             $total_cgst = $total_sgst = $total_igst = 0;
-            $i = sizeof($_POST['product']);
+            $i = isset($_POST['product']) ? sizeof($_POST['product']) : 0;
             
             for ($r = 0; $r < $i; $r++) {
                 
@@ -5485,7 +5551,7 @@ class Purchases extends MY_Controller {
                         $item_status = 'received';
                     } elseif ($quantity_received > $item_quantity) {
                         $this->session->set_flashdata('error', lang("received_more_than_ordered"));
-                        redirect($_SERVER["HTTP_REFERER"]);
+                        redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('purchases'));
                     }
                     $balance_qty = $quantity_received - ($ordered_quantity - $quantity_balance);
             
@@ -5720,7 +5786,7 @@ class Purchases extends MY_Controller {
                 if (!$this->upload->do_upload('document')) {
                     $error = $this->upload->display_errors();
                     $this->session->set_flashdata('error', $error);
-                    redirect($_SERVER["HTTP_REFERER"]);
+                    redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('purchases'));
                 }
                 $photo = $this->upload->file_name;
                 $data['attachment'] = $photo;
@@ -5747,10 +5813,12 @@ class Purchases extends MY_Controller {
             if ($this->Settings->disable_editing) {
                 if ($this->data['inv']->date <= date('Y-m-d', strtotime('-' . $this->Settings->disable_editing . ' days'))) {
                     $this->session->set_flashdata('error', sprintf(lang("purchase_x_edited_older_than_x_days"), $this->Settings->disable_editing));
-                    redirect($_SERVER["HTTP_REFERER"]);
+                    redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('purchases'));
                 }
             }
+            $pr = array();
             $inv_items = $this->purchases_model->getAllPurchaseItems($id, 'product_code');  //second parameter order by name
+            if (!empty($inv_items)) {
             krsort($inv_items);
             $c = rand(100000, 9999999);
             
@@ -5834,6 +5902,7 @@ class Purchases extends MY_Controller {
                 $pr[$ri] = array('id' => $c, 'item_id' => $row_id, 'label' => $row->name . " (" . $row->code . ")",
                     'row' => $row, 'tax_rate' => $tax_rate, 'units' => $units, 'options' => $options, 'batchs' => $batchoption, 'option_batches'=> $productbatches );
                 $c++;
+            }
             }
 
             $this->data['inv_items'] = json_encode($pr);

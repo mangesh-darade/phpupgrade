@@ -13,7 +13,7 @@ class Calendar extends MY_Controller
         }
         if ($this->Customer || $this->Supplier) {
             $this->session->set_flashdata('warning', lang('access_denied'));
-            redirect($_SERVER["HTTP_REFERER"]);
+            redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url());
         }
 
         $this->load->library('form_validation');
@@ -45,7 +45,7 @@ class Calendar extends MY_Controller
             $end = $this->input->get('end', true); 
         }
 
-        $input_arrays = $this->calendar_model->getEvents($start, $end);
+        $input_arrays = $this->calendar_model->getEvents($start, $end) ?: array();
         $start = $this->fc->parseDateTime($start);
         $end = $this->fc->parseDateTime($end);
         $output_arrays = array();

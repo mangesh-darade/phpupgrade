@@ -1643,7 +1643,7 @@ class Products_model extends CI_Model {
                     'batch_number' => $product['batch_number'] ? $product['batch_number'] : NULL,
                     'quantity' => $product['quantity'],
                     'warehouse_id' => $product['warehouse_id'],
-                    'serial_no' => $product['serial_no'],
+                    'serial_no' => isset($product['serial_no']) ? $product['serial_no'] : null,
                     'type' => $product['type'],
                     'shade_id' => $product['shade_id']
                 );
@@ -1707,7 +1707,7 @@ class Products_model extends CI_Model {
                     'batch_number' => $product['batch_number'] ? $product['batch_number'] : NULL,
                     'quantity' => $product['quantity'],
                     'warehouse_id' => $product['warehouse_id'],
-                    'serial_no' => $product['serial_no'],
+                    'serial_no' => isset($product['serial_no']) ? $product['serial_no'] : null,
                     'type' => $product['type'],
                     'shade_id' => $product['shade_id']
                 );

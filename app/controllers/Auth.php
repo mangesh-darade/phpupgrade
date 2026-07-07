@@ -129,6 +129,9 @@ class Auth extends MY_Controller
         $this->data['title'] = lang('profile');
 
         $user = $this->ion_auth->user($id)->row();
+        if (!$user) {
+            show_404();
+        }
         $groups = $this->ion_auth->groups()->result_array();
         $this->data['csrf'] = $this->_get_csrf_nonce();
         $this->data['user'] = $user;
@@ -246,7 +249,10 @@ class Auth extends MY_Controller
                 $user_id = $this->session->userdata('user_id'); 
                 $this->db->where('id', $user_id);
                 $query = $this->db->get('sma_users');
-                $user = $query->row(); 
+                $user = $query->row();
+                if (!$user) {
+                    redirect('login');
+                }
                 $group_id = $user->group_id;
                 $this->db->where('id', $group_id);
                 $group_query = $this->db->get('sma_groups');
@@ -442,7 +448,7 @@ function restandlogout(){
            ]);
            $logout = $this->ion_auth->logout();
         $this->session->set_flashdata('message', $this->ion_auth->messages());
-        redirect('login/' . $m);
+        redirect('login');
         
     }
 
@@ -740,6 +746,9 @@ function restandlogout(){
         }
 
         $user = $this->ion_auth->user($id)->row();
+        if (!$user) {
+            show_404();
+        }
 
         if ($user->username != $this->input->post('username')) {
             $this->form_validation->set_rules('username', lang("username"), 'trim|is_unique[users.username]');
@@ -1316,6 +1325,10 @@ function restandlogout(){
 
         $user_id = $this->session->userdata('forgot_password_user_id');
         $user = $this->ion_auth->user($user_id)->row();
+        if (!$user) {
+            $this->session->unset_userdata('forgot_password_user_id');
+            redirect('login');
+        }
 
         $this->form_validation->set_rules('new_password', lang('password'), 'required|min_length[8]|max_length[25]|matches[new_password_confirm]');
         $this->form_validation->set_rules('new_password_confirm', lang('confirm_password'), 'required');

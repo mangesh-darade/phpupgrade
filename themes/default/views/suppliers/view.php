@@ -5,9 +5,10 @@
             <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
                 <i class="fa fa-2x">&times;</i>
             </button>
-            <h4 class="modal-title" id="myModalLabel"><?= $supplier->company && $supplier->company != '-' ? $supplier->company : $supplier->name; ?></h4>
+            <h4 class="modal-title" id="myModalLabel"><?= !empty($supplier) ? ($supplier->company && $supplier->company != '-' ? $supplier->company : $supplier->name) : lang('supplier_x_deleted'); ?></h4>
         </div>
         <div class="modal-body">
+            <?php if (!empty($supplier)) { ?>
             <div class="table-responsive">
                 <table class="table table-striped table-bordered" style="margin-bottom:0;">
                     <tbody>
@@ -74,12 +75,15 @@
                     </tbody>
                 </table>
             </div>
+            <?php } else { ?>
+            <p class="text-danger"><?= !empty($error) ? $error : lang('supplier_x_deleted'); ?></p>
+            <?php } ?>
             <div class="modal-footer no-print">
                 <button type="button" class="btn btn-default pull-left" data-dismiss="modal"><?= lang('close'); ?></button>
-                <?php if ($Owner || $Admin || $GP['reports-suppliers']) { ?>
+                <?php if (!empty($supplier) && ($Owner || $Admin || !empty($GP['reports-suppliers']))) { ?>
                     <a href="<?=site_url('reports/supplier_report/'.$supplier->id);?>" target="_blank" class="btn btn-primary"><?= lang('suppliers_report'); ?></a>
                 <?php } ?>
-                <?php if ($Owner || $Admin || $GP['suppliers-edit']) { ?>
+                <?php if (!empty($supplier) && ($Owner || $Admin || !empty($GP['suppliers-edit']))) { ?>
                     <a href="<?=site_url('suppliers/edit/'.$supplier->id);?>" data-toggle="modal" data-target="#myModal2" class="btn btn-primary"><?= lang('edit_supplier'); ?></a>
                 <?php } ?>
             </div>

@@ -1001,7 +1001,7 @@ class Site extends CI_Model {
         }
         unset($where_clause['batch_number']);
 
-        if ($where_clause['status']) {
+        if (!empty($where_clause['status'])) {
             $this->db->where('status', $where_clause['status']);
             unset($where_clause['status']);
         } else {

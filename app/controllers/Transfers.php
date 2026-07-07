@@ -11,7 +11,7 @@ class Transfers extends MY_Controller
         }
         if ($this->Customer || $this->Supplier) {
             $this->session->set_flashdata('warning', lang('access_denied'));
-            redirect($_SERVER["HTTP_REFERER"]);
+            redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('transfers'));
         }
         $this->lang->load('transfers', $this->Settings->user_language);
         $this->load->library('form_validation');
@@ -287,7 +287,7 @@ class Transfers extends MY_Controller
                 if (!$this->upload->do_upload('document')) {
                     $error = $this->upload->display_errors();
                     $this->session->set_flashdata('error', $error);
-                    redirect($_SERVER["HTTP_REFERER"]);
+                    redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('transfers'));
                 }
                 $photo = $this->upload->file_name;
                 $data['attachment'] = $photo;
@@ -335,6 +335,10 @@ class Transfers extends MY_Controller
             $id = $this->input->get('id');
         }
         $transfer = $this->transfers_model->getTransferByID($id);
+        if (!$transfer) {
+            $this->session->set_flashdata('error', lang('no_transfer_selected'));
+            redirect('transfers');
+        }
         $last_status = $transfer->status;
         
         if($this->session->userdata('view_right')=='0'){ 
@@ -379,7 +383,7 @@ class Transfers extends MY_Controller
             if($last_status==$status){
                 $error = 'Status has been not changed';
                 $this->session->set_flashdata('error', $error);
-                redirect($_SERVER["HTTP_REFERER"]);
+                redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('transfers'));
             }                   
             
             if($last_status != 'completed'){
@@ -412,7 +416,7 @@ class Transfers extends MY_Controller
                         if( $quantity_balance < $item_unit_quantity && $status != 'completed'){
                             $error = 'Product quantity not more than balance quantity';
                             $this->session->set_flashdata('error', $error);
-                            redirect($_SERVER["HTTP_REFERER"]);
+                            redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('transfers'));
                         } else {
                             switch ($status) {
                                 case 'partial':
@@ -561,7 +565,7 @@ class Transfers extends MY_Controller
                 if (!$this->upload->do_upload('document')) {
                     $error = $this->upload->display_errors();
                     $this->session->set_flashdata('error', $error);
-                    redirect($_SERVER["HTTP_REFERER"]);
+                    redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('transfers'));
                 }
                 $photo = $this->upload->file_name;
                 $data['attachment'] = $photo;
@@ -587,10 +591,11 @@ class Transfers extends MY_Controller
 			
             $transfer_items = $this->transfers_model->getAllTransferItems($id, $this->data['transfer']->status);
                       
-            $transfer_completed_items = $this->transfers_model->getTransferCompletedItems($id);
+            $transfer_completed_items = $this->transfers_model->getTransferCompletedItems($id) ?: array();
             
             krsort($transfer_items);
             $c = rand(100000, 9999999);
+            $pr = array();
             foreach ($transfer_items as $item) {               
                 
                 $row = $this->site->getProductByID($item->product_id);
@@ -869,7 +874,7 @@ class Transfers extends MY_Controller
                         if ($batch_setting == 0) {
                             $this->session->set_flashdata('error', "Line {$rw}: Batch number is not allowed as batch setting is disabled for product '{$product_details->name}'" . 
                                 ($variant ? " (Variant: {$variant})" : ""));
-                            redirect($_SERVER["HTTP_REFERER"]);
+                            redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('transfers'));
                         }
                         
                         // For batch settings 1 or 2, check if batch exists
@@ -895,24 +900,24 @@ class Transfers extends MY_Controller
                         if (!$batch) {
                             $this->session->set_flashdata('error', "Line {$rw}: Batch number '{$csv_pr['batch_number']}' not found for product '{$product_details->name}'" . 
                                 ($variant ? " (Variant: {$variant})" : ""));
-                            redirect($_SERVER["HTTP_REFERER"]);
+                            redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('transfers'));
                         }
                     } 
                     // If batch is enabled (setting 1 or 2) and batch number is empty, show error
                     elseif (($batch_setting == 1 || $batch_setting == 2) && empty($item_batch_number)) {
                         $this->session->set_flashdata('error', "Line {$rw}: Batch number is required for product '{$product_details->name}'" . 
                             ($variant ? " (Variant: {$variant})" : ""));
-                        redirect($_SERVER["HTTP_REFERER"]);
+                        redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('transfers'));
                     }
 
                     // --- Negative Value Validations ---
                     if ($item_net_cost < 0) {
                         $this->session->set_flashdata('error', "Line {$rw}: Net Cost cannot be negative for product '{$item_code}'.");
-                        redirect($_SERVER["HTTP_REFERER"]);
+                        redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('transfers'));
                     }
                     if ($item_quantity < 0) {
                         $this->session->set_flashdata('error', "Line {$rw}: Quantity must be greater than zero for product '{$item_code}'.");
-                        redirect($_SERVER["HTTP_REFERER"]);
+                        redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('transfers'));
                     }
 
                     // --- Expiry Date Validation ---
@@ -920,20 +925,20 @@ class Transfers extends MY_Controller
                         $today = date('Y-m-d');
                         if ($item_expiry < $today) {
                             $this->session->set_flashdata('error', "Line {$rw}: Invalid expiry date for product '{$item_code}'. Expiry date cannot be earlier than today.");
-                            redirect($_SERVER["HTTP_REFERER"]);
+                            redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('transfers'));
                         }
                     }
 
                     if (isset($item_code) && isset($item_net_cost) && isset($item_quantity)) {
                         if (!($product_details = $this->transfers_model->getProductByCode($item_code))) {
                             $this->session->set_flashdata('error', lang("pr_not_found") . " ( " . $csv_pr['product'] . " ). " . lang("line_no") . " " . $rw);
-                            redirect($_SERVER["HTTP_REFERER"]);
+                            redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('transfers'));
                         }
                         if ($variant) {
                             $item_option = $this->transfers_model->getProductVariantByName($variant, $product_details->id);
                             if (!$item_option) {
                                 $this->session->set_flashdata('error', lang("pr_not_found") . " ( " . $csv_pr['product'] . " - " . $csv_pr['variant'] . " ). " . lang("line_no") . " " . $rw);
-                                redirect($_SERVER["HTTP_REFERER"]);
+                                redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('transfers'));
                             }
                         } else {
                             $item_option = json_decode('{}');
@@ -944,7 +949,7 @@ class Transfers extends MY_Controller
                             $warehouse_quantity = $this->transfers_model->getWarehouseProduct($from_warehouse_details->id, $product_details->id, $item_option->id);
                             if ($warehouse_quantity->quantity < $item_quantity) {
                                 $this->session->set_flashdata('error', lang("no_match_found") . " (" . lang('product_name') . " <strong>" . $product_details->name . "</strong> " . lang('product_code') . " <strong>" . $product_details->code . "</strong>) " . lang("line_no") . " " . $rw);
-                                redirect($_SERVER["HTTP_REFERER"]);
+                                redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('transfers'));
                             }
                         }
 
@@ -1068,7 +1073,7 @@ class Transfers extends MY_Controller
                 if (!$this->upload->do_upload('document')) {
                     $error = $this->upload->display_errors();
                     $this->session->set_flashdata('error', $error);
-                    redirect($_SERVER["HTTP_REFERER"]);
+                    redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('transfers'));
                 }
                 $photo = $this->upload->file_name;
                 $data['attachment'] = $photo;
@@ -1116,6 +1121,10 @@ class Transfers extends MY_Controller
         }
         $this->data['error'] = (validation_errors() ? validation_errors() : $this->session->flashdata('error'));
         $transfer = $this->transfers_model->getTransferByID($transfer_id);
+        if (!$transfer) {
+            $this->session->set_flashdata('error', lang('no_transfer_selected'));
+            redirect('transfers');
+        }
         if (!$this->session->userdata('view_right')) {
             $this->sma->view_rights($transfer->created_by, true);
         }
@@ -1123,7 +1132,9 @@ class Transfers extends MY_Controller
         foreach ($this->data['rows'] as $row) {
             if (!empty($row->shade_id)) {
                 $colors = $this->transfers_model->getProductOptionByID($row->shade_id);
-                $row->shade_name= $colors->name;
+                if ($colors) {
+                    $row->shade_name= $colors->name;
+                }
             }
         }
         $fromWarehouse = $this->site->getWarehouseByID($transfer->from_warehouse_id);
@@ -1151,6 +1162,10 @@ class Transfers extends MY_Controller
 
         $this->data['error'] = (validation_errors() ? validation_errors() : $this->session->flashdata('error'));
         $transfer = $this->transfers_model->getTransferByID($transfer_id);
+        if (!$transfer) {
+            $this->session->set_flashdata('error', lang('no_transfer_selected'));
+            redirect('transfers');
+        }
         if (!$this->session->userdata('view_right')) {
             $this->sma->view_rights($transfer->created_by);
         }
@@ -1158,7 +1173,9 @@ class Transfers extends MY_Controller
         foreach ($this->data['rows'] as $row) {
             if (!empty($row->shade_id)) {
                 $colors = $this->transfers_model->getProductOptionByID($row->shade_id);
-                $row->shade_name= $colors->name;
+                if ($colors) {
+                    $row->shade_name= $colors->name;
+                }
             }
         }
         $fromWarehouse = $this->site->getWarehouseByID($transfer->from_warehouse_id);
@@ -1191,6 +1208,9 @@ class Transfers extends MY_Controller
 
             $this->data['error'] = (validation_errors() ? validation_errors() : $this->session->flashdata('error'));
             $transfer = $this->transfers_model->getTransferByID($transfer_id);
+            if (!$transfer) {
+                continue;
+            }
             if (!$this->session->userdata('view_right')) {
                 $this->sma->view_rights($transfer->created_by);
             }
@@ -1198,7 +1218,9 @@ class Transfers extends MY_Controller
             foreach ($this->data['rows'] as $row) {
                 if (!empty($row->shade_id)) {
                     $colors = $this->transfers_model->getProductOptionByID($row->shade_id);
-                    $row->shade_name= $colors->name;
+                    if ($colors) {
+                        $row->shade_name= $colors->name;
+                    }
                 }
             }
             $fromWarehouse  = $this->site->getWarehouseByID($transfer->from_warehouse_id);
@@ -1228,6 +1250,10 @@ class Transfers extends MY_Controller
             $transfer_id = $this->input->get('id');
         }
         $transfer = $this->transfers_model->getTransferByID($transfer_id);
+        if (!$transfer) {
+            $this->session->set_flashdata('error', lang('no_transfer_selected'));
+            redirect('transfers');
+        }
         //$this->form_validation->set_rules('to', lang("to") . " " . lang("email"), 'trim|required|valid_email');
         $this->form_validation->set_rules('subject', lang("subject"), 'trim|required');
         $this->form_validation->set_rules('cc', lang("cc"), 'trim|valid_emails');
@@ -1268,7 +1294,7 @@ class Transfers extends MY_Controller
         } elseif ($this->input->post('send_email')) {
             $this->data['error'] = (validation_errors() ? validation_errors() : $this->session->flashdata('error'));
             $this->session->set_flashdata('error', $this->data['error']);
-            redirect($_SERVER["HTTP_REFERER"]);
+            redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('transfers'));
         }
 
 
@@ -1277,7 +1303,7 @@ class Transfers extends MY_Controller
             //$this->session->set_flashdata('message', lang("email_sent"));
             //redirect("transfers");
             $this->session->set_flashdata('message', lang("email_sent_msg"));
-            redirect($_SERVER["HTTP_REFERER"]);
+            redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('transfers'));
         } else {
 
             $this->data['error'] = (validation_errors() ? validation_errors() : $this->session->flashdata('error'));
@@ -1316,6 +1342,10 @@ class Transfers extends MY_Controller
         }
         
         $otransfer = $this->transfers_model->getTransferByID($id);
+        if (!$otransfer) {
+            $this->session->set_flashdata('error', lang('no_transfer_selected'));
+            redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('transfers'));
+        }
         if($otransfer->status == 'completed'){
             $error = '<p class="text-danger">Failed: Completed transfer cannot delete.</p>';
             if($this->input->is_ajax_request()) {
@@ -1323,14 +1353,14 @@ class Transfers extends MY_Controller
             }
             
             $this->session->set_flashdata('error', $error);
-            redirect($_SERVER["HTTP_REFERER"]);
+            redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('transfers'));
         } else {
             if ($this->transfers_model->deleteTransfer($id, $otransfer)) {
                 if($this->input->is_ajax_request()) {
                     echo lang("transfer_deleted"); die();
                 }
                 $this->session->set_flashdata('message', lang('transfer_deleted'));
-                redirect($_SERVER["HTTP_REFERER"]);
+                redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('transfers'));
             }
         }
     }
@@ -1356,6 +1386,7 @@ class Transfers extends MY_Controller
         if ($rows) {
             $c = str_replace(".", "", microtime(true));
             $r = 0;
+            $pr = array();
             foreach ($rows as $row) {
                // $option = FALSE;
                 $option = ($exp[1])?$exp[1]:false; // Using Barcode Scan time
@@ -1372,8 +1403,8 @@ class Transfers extends MY_Controller
                 $row->ordered_quantity = 0;
                 $options = $this->transfers_model->getProductOptions($row->id, $warehouse_id);
                 if ($options) {
-                    $opt = $option_id && $r == 0 ? $this->transfers_model->getProductOptionByID($option_id) : $options[0];
-                    if (!$option_id || $r > 0) {
+                    $opt = $option_id && $r == 0 ? $this->transfers_model->getProductOptionByID($option_id) : (is_array($options) ? reset($options) : false);
+                    if ($opt && (!$option_id || $r > 0)) {
                         $option_id = $opt->id;
                     }
                 } else {
@@ -1455,6 +1486,7 @@ class Transfers extends MY_Controller
         if ($rows) {
             $c = str_replace(".", "", microtime(true));
             $r = 0;
+            $pr = array();
             foreach ($rows as $row) {
 
                 $option = ($exp[1]) ? $exp[1] : false; // Using Barcode Scan time
@@ -1477,15 +1509,17 @@ class Transfers extends MY_Controller
                 $options = $this->products_model->getProductOptionswithbatchAndWarehous($row->id, $warehouse_id, 1);
                 if ($options) {
                     $option_id = $option_id ? $option_id : ($row->primary_variant ? $row->primary_variant : 0);
-                    $opt = ($option_id) ? $options[$option_id] : current($options); 
-                    if (!$option_id) {
-                        $option_id = $opt->id;
+                    $opt = ($option_id && isset($options[$option_id])) ? $options[$option_id] : current($options);
+                    if ($opt) {
+                        if (!$option_id) {
+                            $option_id = $opt->id;
+                        }
+                        if($opt->cost > 0) {
+                            $row->cost = $opt->cost;
+                        }
+                        $row->qty    = $opt->unit_quantity ? $opt->unit_quantity : 1;
+                        $row->option = $option_id;
                     }
-                    if($opt->cost > 0) {
-                        $row->cost = $opt->cost;
-                    }
-                    $row->qty    = $opt->unit_quantity ? $opt->unit_quantity : 1;
-                    $row->option = $option_id;
                 } 
                 
                 if ($row->storage_type == 'loose' || !$options ) {
@@ -1609,8 +1643,10 @@ class Transfers extends MY_Controller
                  * */
                 if ($options) {
                     $opt = ($option_id && $r == 0 ) ? $this->transfers_model->getProductOptionByID($option_id) : current($options);
-                    if (!$option_id || $r > 0) {
-                        $option_id = $opt->id;
+                    if ($opt) {
+                        if (!$option_id || $r > 0) {
+                            $option_id = $opt->id;
+                        }
                     }
                 } else {
                     $opt = json_decode('{}');
@@ -1620,10 +1656,12 @@ class Transfers extends MY_Controller
                 $options_color = $this->products_model->getProductOptionswithbatchAndWarehous($row->id, $warehouse_id, 2);
                 if ($options_color) {
 				    $opt_color = $option_color_id && $r == 0 ? $this->transfers_model->getProductOptionByID($option_color_id) : current($options_color);
-					if (!$option_color_id || $r > 0) {
-						$option_color_id = $opt_color->id;
-                        $row->option_color = $option_color_id;
-                        $row->option_color_name = $opt_color->name;
+					if ($opt_color) {
+                        if (!$option_color_id || $r > 0) {
+                            $option_color_id = $opt_color->id;
+                            $row->option_color = $option_color_id;
+                            $row->option_color_name = $opt_color->name;
+                        }
                     }
                 } else {
                     $opt_color = json_decode('{}');
@@ -1631,7 +1669,7 @@ class Transfers extends MY_Controller
                 
                 $row->option = $option_id ? $option_id : 0;
                 $row->supplier_part_no = '';
-                if ($opt->cost != 0) {
+                if ($opt && $opt->cost != 0) {
                     $row->cost = $opt->cost;
                     $row->base_unit_cost = $row->cost;
                     $row->real_unit_cost = $row->cost;
@@ -1665,7 +1703,7 @@ class Transfers extends MY_Controller
     {
         if (!$this->Owner) {
             $this->session->set_flashdata('warning', lang('access_denied'));
-            redirect($_SERVER["HTTP_REFERER"]);
+            redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('transfers'));
         }
 
         $this->form_validation->set_rules('form_action', lang("form_action"), 'required');
@@ -1679,7 +1717,7 @@ class Transfers extends MY_Controller
                         $this->transfers_model->deleteTransfer($id);
                     }
                     $this->session->set_flashdata('message', lang("transfers_deleted"));
-                    redirect($_SERVER["HTTP_REFERER"]);
+                    redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('transfers'));
 
                 } elseif ($this->input->post('form_action') == 'combine') {
 
@@ -1708,6 +1746,9 @@ class Transfers extends MY_Controller
                     $row = 3;
                     foreach ($_POST['val'] as $id) {
                         $tansfer = $this->transfers_model->getTransferByID($id);
+                        if (!$tansfer) {
+                            continue;
+                        }
                         $this->excel->getActiveSheet()->SetCellValue('A' . $row, $this->sma->hrld($tansfer->date));
                         $this->excel->getActiveSheet()->SetCellValue('B' . $row, $tansfer->transfer_no);
                         $this->excel->getActiveSheet()->SetCellValue('C' . $row, $tansfer->from_warehouse_name);
@@ -1752,15 +1793,15 @@ class Transfers extends MY_Controller
                         return $objWriter->save('php://output');
                     }
 
-                    redirect($_SERVER["HTTP_REFERER"]);
+                    redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('transfers'));
                 }
             } else {
                 $this->session->set_flashdata('error', lang("no_transfer_selected"));
-                redirect($_SERVER["HTTP_REFERER"]);
+                redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('transfers'));
             }
         } else {
             $this->session->set_flashdata('error', validation_errors());
-            redirect($_SERVER["HTTP_REFERER"]);
+            redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('transfers'));
         }
     }
 
@@ -1783,6 +1824,10 @@ class Transfers extends MY_Controller
         } else {
 
             $this->data['inv'] = $this->transfers_model->getTransferByID($id);
+            if (!$this->data['inv']) {
+                $this->session->set_flashdata('error', lang('no_transfer_selected'));
+                redirect('transfers');
+            }
             $this->data['modal_js'] = $this->site->modal_js();
             $this->load->view($this->theme.'transfers/update_status', $this->data);
 
@@ -1831,7 +1876,7 @@ class Transfers extends MY_Controller
 //     
 //        echo json_encode($sql->werehouse_2_quantity);
         
-        return $sql->werehouse_2_quantity;
+        return ($sql && isset($sql->werehouse_2_quantity)) ? $sql->werehouse_2_quantity : 0;
     }
      
     public function getQuantity(){
@@ -2012,7 +2057,7 @@ class Transfers extends MY_Controller
                 if (!$this->upload->do_upload('document')) {
                     $error = $this->upload->display_errors();
                     $this->session->set_flashdata('error', $error);
-                    redirect($_SERVER["HTTP_REFERER"]);
+                    redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('transfers'));
                 }
                 $photo = $this->upload->file_name;
                 $data['attachment'] = $photo;
@@ -2059,6 +2104,10 @@ class Transfers extends MY_Controller
         }
         
         $transfer_request = $this->transfers_model->getTransferRequestByID($id);
+        if (!$transfer_request) {
+            $this->session->set_flashdata('error', lang('no_transfer_selected'));
+            redirect('transfers/request');
+        }
         $last_status = $transfer_request->status;
         
         if($this->session->userdata('view_right')=='0'){ 
@@ -2109,7 +2158,7 @@ class Transfers extends MY_Controller
             if($status != 'partial' && $last_status == $status){
                 $error = 'Status has been not changed';
                 $this->session->set_flashdata('error', $error);
-                redirect($_SERVER["HTTP_REFERER"]);
+                redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('transfers'));
             }
             
             if($status == 'closed'){
@@ -2125,7 +2174,7 @@ class Transfers extends MY_Controller
                     if($_POST['quantity'][$r] > $_POST['quantity_balance'][$r]){
                         $error = 'Product ['.$_POST['product_name'][$r].'] quantity should not greater than balance quantity.';
                         $this->session->set_flashdata('error', $error);
-                        redirect($_SERVER["HTTP_REFERER"]);
+                        redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('transfers'));
                     }
                 }
             }
@@ -2313,7 +2362,7 @@ class Transfers extends MY_Controller
                 if (!$this->upload->do_upload('document')) {
                     $error = $this->upload->display_errors();
                     $this->session->set_flashdata('error', $error);
-                    redirect($_SERVER["HTTP_REFERER"]);
+                    redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('transfers'));
                 }
                 $photo = $this->upload->file_name;
                 $data['attachment'] = $photo;
@@ -2342,10 +2391,11 @@ class Transfers extends MY_Controller
             $this->data['error'] = (validation_errors() ? validation_errors() : $this->session->flashdata('error'));
             $this->data['transfer_request'] = $transfer_request = $this->transfers_model->getTransferRequestByID($id);
 			
-            $transfer_request_items = $this->transfers_model->getAllTransferRequestItems($id); 
+            $transfer_request_items = $this->transfers_model->getAllTransferRequestItems($id) ?: array(); 
             
             krsort($transfer_request_items);
             $c = rand(100000, 9999999);
+            $pr = array();
             foreach ($transfer_request_items as $item) {               
                 
                 $row = $this->site->getProductByID($item->product_id);
@@ -2613,10 +2663,14 @@ class Transfers extends MY_Controller
         }
         $this->data['error'] = (validation_errors() ? validation_errors() : $this->session->flashdata('error'));
         $transfer_request = $this->transfers_model->getTransferRequestByID($request_id);
+        if (!$transfer_request) {
+            $this->session->set_flashdata('error', lang('no_transfer_selected'));
+            redirect('transfers/request');
+        }
         if (!$this->session->userdata('view_right')) {
             $this->sma->view_rights($transfer_request->created_by, true);
         }
-        $this->data['rows'] = $this->transfers_model->getAllTransferRequestItems($request_id);
+        $this->data['rows'] = $this->transfers_model->getAllTransferRequestItems($request_id) ?: array();
         $fromWarehouse = $this->site->getWarehouseByID($transfer_request->from_warehouse_id);
         $toWarehouse = $this->site->getWarehouseByID($transfer_request->to_warehouse_id);
         $this->data['from_warehouse'] = $fromWarehouse[$transfer_request->from_warehouse_id];
@@ -2636,13 +2690,17 @@ class Transfers extends MY_Controller
         }
         $this->data['error'] = (validation_errors() ? validation_errors() : $this->session->flashdata('error'));
         $request = $this->transfers_model->getTransferRequestByID($request_id);
+        if (!$request) {
+            $this->session->set_flashdata('error', lang('no_transfer_selected'));
+            redirect('transfers/request');
+        }
         
         if($request->status == 'pending'){
             
             $this->db->update('transfer_request',['status'=>'cancelled'], ['id' => $request_id]);
             $msg = 'Request has been cancelled successfully.';
             if($this->input->is_ajax_request()) {
-                echo $error; die();
+                echo $msg; die();
             }
             $this->session->set_flashdata('message', $msg);
             redirect('transfers/request'); 
@@ -2670,6 +2728,10 @@ class Transfers extends MY_Controller
         }
         
         $otransfer = $this->transfers_model->getTransferRequestByID($id);
+        if (!$otransfer) {
+            $this->session->set_flashdata('error', lang('no_transfer_selected'));
+            redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('transfers'));
+        }
         if($otransfer->status != 'pending' && $otransfer->status != 'cancelled'){
             $error = '<p class="text-danger">Request that have already been '.$otransfer->status.' cannot be deleted.</p>';            
             if($this->input->is_ajax_request()) {
@@ -2677,14 +2739,14 @@ class Transfers extends MY_Controller
             }
             
             $this->session->set_flashdata('error', $error);
-            redirect($_SERVER["HTTP_REFERER"]);
+            redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('transfers'));
         } else {
             if ($this->transfers_model->deleteTransferRequest($id)) {
                 if($this->input->is_ajax_request()) {
                     echo lang("transfer_deleted"); die();
                 }
                 $this->session->set_flashdata('message', lang('transfer_deleted'));
-                redirect($_SERVER["HTTP_REFERER"]);
+                redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('transfers'));
             }
         }
     }
@@ -2810,7 +2872,7 @@ class Transfers extends MY_Controller
     {
         if (!$this->Owner) {
             $this->session->set_flashdata('warning', lang('access_denied'));
-            redirect($_SERVER["HTTP_REFERER"]);
+            redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('transfers'));
         }
         $this->form_validation->set_rules('form_action', lang("form_action"), 'required');
 
@@ -2856,6 +2918,9 @@ class Transfers extends MY_Controller
 
                         //call model
                         $tansfer = $this->transfers_model->getTransferByID($id);
+                        if (!$tansfer) {
+                            continue;
+                        }
                         
                         // Get products based on status like getAllTransferReportItems
                         if ($tansfer->status == 'completed') {
@@ -3076,15 +3141,15 @@ class Transfers extends MY_Controller
                         return $objWriter->save('php://output');
                     }
 
-                    redirect($_SERVER["HTTP_REFERER"]);
+                    redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('transfers'));
                 }
             } else {
                 $this->session->set_flashdata('error', lang("no_transfer_selected"));
-                redirect($_SERVER["HTTP_REFERER"]);
+                redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('transfers'));
             }
         } else {
             $this->session->set_flashdata('error', validation_errors());
-            redirect($_SERVER["HTTP_REFERER"]);
+            redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('transfers'));
         }
     }
     // End Request
@@ -3097,12 +3162,16 @@ class Transfers extends MY_Controller
         }
         $this->data['error'] = (validation_errors() ? validation_errors() : $this->session->flashdata('error'));
         $transfer = $this->transfers_model->getTransferByID($transfer_id);
+        if (!$transfer) {
+            $this->session->set_flashdata('error', lang('no_transfer_selected'));
+            redirect('transfers');
+        }
         
         if (!$this->session->userdata('view_right')) {
 
             $this->sma->view_rights($transfer->created_by, true);
         }
-        $this->data['rows'] = $this->transfers_model->getAllTransferReportItems($transfer_id, $transfer->status);
+        $this->data['rows'] = $this->transfers_model->getAllTransferReportItems($transfer_id, $transfer->status) ?: array();
         $fromWarehouse = $this->site->getWarehouseByID($transfer->from_warehouse_id);
         $toWarehouse = $this->site->getWarehouseByID($transfer->to_warehouse_id);
         $this->data['from_warehouse'] = $fromWarehouse[$transfer->from_warehouse_id];

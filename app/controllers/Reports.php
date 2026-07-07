@@ -295,12 +295,12 @@ class Reports extends MY_Controller {
         
             // --- No data found ---
             $this->session->set_flashdata('error', lang('nothing_found'));
-            redirect($_SERVER["HTTP_REFERER"]);
+            redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('reports'));
         }
          else {
             $this->load->library('datatables');
-            $show_batch = ($this->data['Settings']->product_batch_setting == 1 ||
-            $this->data['Settings']->product_batch_setting == 2);
+            $show_batch = ($this->Settings->product_batch_setting == 1 ||
+            $this->Settings->product_batch_setting == 2);
 
             if ($warehouse_id) {
                 $getwarehouse = str_replace("_", ",", $warehouse_id);
@@ -601,7 +601,7 @@ class Reports extends MY_Controller {
     //             }
     //         }
     //         $this->session->set_flashdata('error', lang('nothing_found'));
-    //         redirect($_SERVER["HTTP_REFERER"]);
+    //         redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('reports'));
     //     } else {
     //         $this->load->library('datatables');            
     //         $batch_enabled = ($this->Settings->product_batch_setting == 1 || $this->Settings->product_batch_setting == 2);
@@ -1108,7 +1108,7 @@ class Reports extends MY_Controller {
                 }
             }
             $this->session->set_flashdata('error', lang('nothing_found'));
-            redirect($_SERVER["HTTP_REFERER"]);
+            redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('reports'));
         } else {
             $this->load->library('datatables');
             if ($warehouse_id) {
@@ -1847,7 +1847,7 @@ class Reports extends MY_Controller {
             }
         
             $this->session->set_flashdata('error', lang('nothing_found'));
-            redirect($_SERVER["HTTP_REFERER"]);
+            redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('reports'));
         }
         else {
         
@@ -2386,7 +2386,7 @@ class Reports extends MY_Controller {
                 }
             }
             $this->session->set_flashdata('error', lang('nothing_found'));
-            redirect($_SERVER["HTTP_REFERER"]);
+            redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('reports'));
         } else {
 
 
@@ -2632,7 +2632,7 @@ class Reports extends MY_Controller {
                 }
             }
             $this->session->set_flashdata('error', lang('nothing_found'));
-            redirect($_SERVER["HTTP_REFERER"]);
+            redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('reports'));
         } else {
 
 
@@ -2821,10 +2821,10 @@ window.MyHandler.setPrintRequest('<?php echo json_encode($print); ?>');
             $user_id = $this->session->userdata('user_id');
         }
         $this->data['error'] = (validation_errors()) ? validation_errors() : $this->session->flashdata('error');
-        $key = $this->data['sel_warehouse'] ? array_keys($this->data['sel_warehouse']) : 0; //Use to get Id on sel_warehouse 
+        $key = $this->data['sel_warehouse'] ? $this->data['sel_warehouse']->id : 0; //Use to get Id on sel_warehouse 
         //$config = array('show_next_prev' => TRUE, 'next_prev_url' => site_url('reports/daily_sales/' . ($this->data['sel_warehouse']? $this->data['sel_warehouse']->id : 0)), 'month_type' => 'long', 'day_type' => 'long');
 
-        $config = array('show_next_prev' => TRUE, 'next_prev_url' => site_url('reports/daily_sales/' . ($this->data['sel_warehouse'] ? $key[0] : 0)), 'month_type' => 'long', 'day_type' => 'long');
+        $config = array('show_next_prev' => TRUE, 'next_prev_url' => site_url('reports/daily_sales/' . ($this->data['sel_warehouse'] ? $key : 0)), 'month_type' => 'long', 'day_type' => 'long');
 
         $config['template'] = '{table_open}<div class="table-responsive"><table border="0" cellpadding="0" cellspacing="0" class="table table-bordered dfTable">{/table_open}
 		{heading_row_start}<tr>{/heading_row_start}
@@ -3652,7 +3652,7 @@ window.MyHandler.setPrintRequest('<?php echo json_encode($print); ?>');
                 }
             }
             $this->session->set_flashdata('error', lang('nothing_found'));
-            redirect($_SERVER["HTTP_REFERER"]);
+            redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('reports'));
         } else {
 
             /* $si = "( SELECT sale_id, product_id, serial_no, GROUP_CONCAT(CONCAT({$this->db->dbprefix('sale_items')}.product_name, '__', {$this->db->dbprefix('sale_items')}.quantity) SEPARATOR '___') as item_nane from {$this->db->dbprefix('sale_items')} ";
@@ -3999,7 +3999,7 @@ window.MyHandler.setPrintRequest('<?php echo json_encode($print); ?>');
                 }
             }
             $this->session->set_flashdata('error', lang('nothing_found'));
-            redirect($_SERVER["HTTP_REFERER"]);
+            redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('reports'));
         } else {
 
             /* $si = "( SELECT sale_id, product_id, serial_no, GROUP_CONCAT(CONCAT({$this->db->dbprefix('sale_items')}.product_name, '__', {$this->db->dbprefix('sale_items')}.quantity) SEPARATOR '___') as item_nane from {$this->db->dbprefix('sale_items')} ";
@@ -4299,7 +4299,7 @@ window.MyHandler.setPrintRequest('<?php echo json_encode($print); ?>');
                 }
             }
             $this->session->set_flashdata('error', lang('nothing_found'));
-            redirect($_SERVER["HTTP_REFERER"]);
+            redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('reports'));
         } else {
 
             $qi = "( SELECT quote_id, product_id, GROUP_CONCAT(CONCAT({$this->db->dbprefix('quote_items')}.product_name, '__', {$this->db->dbprefix('quote_items')}.quantity) SEPARATOR '___') as item_nane from {$this->db->dbprefix('quote_items')} ";
@@ -4456,7 +4456,7 @@ window.MyHandler.setPrintRequest('<?php echo json_encode($print); ?>');
                 }
             }
             $this->session->set_flashdata('error', lang('nothing_found'));
-            redirect($_SERVER["HTTP_REFERER"]);
+            redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('reports'));
         } else {
 
             $this->load->library('datatables');
@@ -4947,7 +4947,7 @@ window.MyHandler.setPrintRequest('<?php echo json_encode($print); ?>');
             }
             
             $this->session->set_flashdata('error', lang('nothing_found'));
-            redirect($_SERVER["HTTP_REFERER"]);
+            redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('reports'));
         } else {
 
             $pi = "( SELECT 
@@ -5199,7 +5199,7 @@ window.MyHandler.setPrintRequest('<?php echo json_encode($print); ?>');
                 }
             }
             $this->session->set_flashdata('error', lang('nothing_found'));
-            redirect($_SERVER["HTTP_REFERER"]);
+            redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('reports'));
         } else {
 
             $pi = "( SELECT purchase_id, product_id, subtotal, (GROUP_CONCAT(CONCAT({$this->db->dbprefix('purchase_items')}.product_name, '__', {$this->db->dbprefix('purchase_items')}.quantity) SEPARATOR '___')) as item_nane from {$this->db->dbprefix('purchase_items')} ";
@@ -5491,7 +5491,7 @@ window.MyHandler.setPrintRequest('<?php echo json_encode($print); ?>');
                 }
             }
             $this->session->set_flashdata('error', lang('nothing_found'));
-            redirect($_SERVER["HTTP_REFERER"]);
+            redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('reports'));
         } else {
             //REPLACE({$this->db->dbprefix('sales')}.reference_no, SUBSTRING_INDEX({$this->db->dbprefix('sales')}.reference_no, '/', -1), {$this->db->dbprefix('sales')}.id)
             // .$this->db->dbprefix('sales') . ".customer as name, "
@@ -5708,7 +5708,7 @@ window.MyHandler.setPrintRequest('<?php echo json_encode($print); ?>');
             }
 
             $this->session->set_flashdata('error', lang('nothing_found'));
-            redirect($_SERVER["HTTP_REFERER"]);
+            redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('reports'));
         } else {
 
             $this->load->library('datatables');
@@ -6110,7 +6110,7 @@ window.MyHandler.setPrintRequest('<?php echo json_encode($print); ?>');
                 }
             }
             $this->session->set_flashdata('error', lang('nothing_found'));
-            redirect($_SERVER["HTTP_REFERER"]);
+            redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('reports'));
         } else {
 
             $s = "( SELECT customer_id, count(" . $this->db->dbprefix('sales') . ".id) as total, (COALESCE(sum(grand_total), 0)+COALESCE(sum(rounding), 0)) as total_amount, COALESCE(sum(paid), 0) as paid, ( COALESCE(sum(grand_total), 0) + COALESCE(sum(rounding), 0)- COALESCE(sum(paid), 0)) as balance from {$this->db->dbprefix('sales')} ";
@@ -6462,7 +6462,7 @@ window.MyHandler.setPrintRequest('<?php echo json_encode($print); ?>');
                 }
             }
             $this->session->set_flashdata('error', lang('nothing_found'));
-            redirect($_SERVER["HTTP_REFERER"]);
+            redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('reports'));
         } else {
             
             $s = "( SELECT customer_id, 
@@ -6787,7 +6787,7 @@ window.MyHandler.setPrintRequest('<?php echo json_encode($print); ?>');
                 }
             }
             $this->session->set_flashdata('error', lang('nothing_found'));
-            redirect($_SERVER["HTTP_REFERER"]);
+            redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('reports'));
         } else {
 
             $p = "( SELECT supplier_id, count(" . $this->db->dbprefix('purchases') . ".id) as total, COALESCE(sum(grand_total), 0) as total_amount, COALESCE(sum(paid), 0) as paid, ( COALESCE(sum(grand_total), 0) - COALESCE(sum(paid), 0)) as balance from {$this->db->dbprefix('purchases')} ";
@@ -6846,7 +6846,7 @@ window.MyHandler.setPrintRequest('<?php echo json_encode($print); ?>');
     function user_actions() {
         if (!$this->Owner) {
             $this->session->set_flashdata('warning', lang('access_denied'));
-            redirect($_SERVER["HTTP_REFERER"]);
+            redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('reports'));
         }
         $user = $this->site->getAllUser();
 
@@ -6917,11 +6917,11 @@ window.MyHandler.setPrintRequest('<?php echo json_encode($print); ?>');
                     return $objWriter->save('php://output');
                 }
 
-                redirect($_SERVER["HTTP_REFERER"]);
+                redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('reports'));
             }
         } else {
             $this->session->set_flashdata('error', validation_errors());
-            redirect($_SERVER["HTTP_REFERER"]);
+            redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('reports'));
         }
     }
 
@@ -7088,7 +7088,7 @@ window.MyHandler.setPrintRequest('<?php echo json_encode($print); ?>');
                 }
             }
             $this->session->set_flashdata('error', lang('nothing_found'));
-            redirect($_SERVER["HTTP_REFERER"]);
+            redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('reports'));
         } else {
 
             $this->load->library('datatables');
@@ -7624,7 +7624,7 @@ window.MyHandler.setPrintRequest('<?php echo json_encode($print); ?>');
                 }
             }
             $this->session->set_flashdata('error', lang('nothing_found'));
-            redirect($_SERVER["HTTP_REFERER"]);
+            redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('reports'));
         } else {
 
             $this->load->library('datatables');
@@ -7871,7 +7871,7 @@ window.MyHandler.setPrintRequest('<?php echo json_encode($print); ?>');
                 }
             }
             $this->session->set_flashdata('error', lang('nothing_found'));
-            redirect($_SERVER["HTTP_REFERER"]);
+            redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('reports'));
         } else {
 
             $this->load->library('datatables');
@@ -8666,7 +8666,7 @@ window.MyHandler.setPrintRequest('<?php echo json_encode($print); ?>');
             }
             $this->session->set_flashdata('error', lang('nothing_found'));
 
-            redirect($_SERVER["HTTP_REFERER"]);
+            redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('reports'));
         }     else {
             $ai = "( SELECT adjustment_items.adjustment_id, adjustment_items.option_id, adjustment_items.product_id, adjustment_items.serial_no, 
                     GROUP_CONCAT(CONCAT(products.name, '__', 
@@ -9200,7 +9200,7 @@ window.MyHandler.setPrintRequest('<?php echo json_encode($print); ?>');
                 }
             }
             $this->session->set_flashdata('error', lang('nothing_found'));
-            redirect($_SERVER["HTTP_REFERER"]);
+            redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('reports'));
         } else {
 
             $this->load->library('datatables');
@@ -9210,7 +9210,7 @@ window.MyHandler.setPrintRequest('<?php echo json_encode($print); ?>');
             sma_sales.reference_no as reference_no,            
             biller,
             customer,
-            state,
+            comp.state,
             IF(comp.gstn_no IS NULL or comp.gstn_no = '', '-', comp.gstn_no) as gstn_no,
             (SELECT (GROUP_CONCAT(DISTINCT hsn_code)) as hsn FROM `sma_sale_items` WHERE sma_sale_items.sale_id = `sma_sales`.`id`) as hsn,
             (SELECT format( sum(sma_sale_items.quantity),2)  as qty FROM `sma_sale_items` WHERE  sma_sale_items.sale_id = `sma_sales`.`id`) as qty,
@@ -9693,7 +9693,7 @@ window.MyHandler.setPrintRequest('<?php echo json_encode($print); ?>');
                 }
             }
             $this->session->set_flashdata('error', lang('nothing_found'));
-            redirect($_SERVER["HTTP_REFERER"]);
+            redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('reports'));
         } else {
             /*
               (SELECT CONCAT('(',ifnull( `sma_purchase_items_tax`.`attr_per`,0),'%)',ifnull(format(sum(`sma_purchase_items_tax`.`tax_amount`),2),0)) FROM   `sma_purchase_items_tax` WHERE  `sma_purchase_items_tax`.`attr_code` = 'CGST' and `sma_purchase_items_tax`.`purchase_id` = `sma_purchases`.`id`) as CGST,
@@ -10325,7 +10325,7 @@ window.MyHandler.setPrintRequest('<?php echo json_encode($print); ?>');
                 }
             }
             $this->session->set_flashdata('error', lang('nothing_found'));
-            redirect($_SERVER["HTTP_REFERER"]);
+            redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('reports'));
         } else {
             $start_date = $this->input->get('start_date') ? $this->input->get('start_date') : NULL;
             $end_date = $this->input->get('end_date') ? $this->input->get('end_date') : NULL;
@@ -10893,7 +10893,7 @@ window.MyHandler.setPrintRequest('<?php echo json_encode($print); ?>');
                     }
                 }
                 $this->session->set_flashdata('error', lang('nothing_found'));
-                redirect($_SERVER["HTTP_REFERER"]);
+                redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('reports'));
             } else {
                 $this->load->library('datatables');
                 $this->datatables->select("sma_sales.seller_id, companies.name as seller, sum(sma_sales.grand_total + sma_sales.rounding) as grand_total, count(sma_sales.id) as total_sales, sum(sma_sales.total_items) as no_of_items, sum(sma_sales.total_discount) as total_discount, sum(sma_sales.total_tax) as total_tax")
@@ -11173,7 +11173,7 @@ window.MyHandler.setPrintRequest('<?php echo json_encode($print); ?>');
                     }
                 }
                 $this->session->set_flashdata('error', lang('nothing_found'));
-                redirect($_SERVER["HTTP_REFERER"]);
+                redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('reports'));
 
             } else {
                 // Manual JSON Response for Datatables (Legacy Format to match Library)
@@ -11241,7 +11241,7 @@ window.MyHandler.setPrintRequest('<?php echo json_encode($print); ?>');
     }
 
     public function restbutton() {
-        redirect($_SERVER["HTTP_REFERER"]);
+        redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('reports'));
     }
 
     public function daily_sales_items_print() {
@@ -11580,7 +11580,7 @@ window.MyHandler.setPrintRequest('<?php echo json_encode($print); ?>');
                 }
             }
             $this->session->set_flashdata('error', lang('nothing_found'));
-            redirect($_SERVER["HTTP_REFERER"]);
+            redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('reports'));
         } else {
 
             $this->load->library('datatables');
@@ -11917,7 +11917,7 @@ window.MyHandler.setPrintRequest('<?php echo json_encode($print); ?>');
         $this->sma->checkPermissions();
         if (!$this->Owner && !$this->Admin && !$this->GP['reports-product_variant_sale_report']) {
             $this->session->set_flashdata('warning', lang('access_denied'));
-            redirect($_SERVER["HTTP_REFERER"]);
+            redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('reports'));
         }
         $this->data['error'] = (validation_errors() ? validation_errors() : $this->session->flashdata('error'));
         $this->data['categories'] = $this->site->getAllCategories();
@@ -12755,7 +12755,7 @@ window.MyHandler.setPrintRequest('<?php echo json_encode($print); ?>');
                 }
             }
             $this->session->set_flashdata('error', lang('nothing_found'));
-            redirect($_SERVER["HTTP_REFERER"]);
+            redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('reports'));
         } else {
 
             $this->load->library('datatables');
@@ -13017,7 +13017,7 @@ window.MyHandler.setPrintRequest('<?php echo json_encode($print); ?>');
             }
 
             $this->session->set_flashdata('error', lang('nothing_found'));
-            redirect($_SERVER["HTTP_REFERER"]);
+            redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('reports'));
         } else {
 
             $this->load->library('datatables');
@@ -13432,12 +13432,12 @@ window.MyHandler.setPrintRequest('<?php echo json_encode($print); ?>');
                 }
             }
             $this->session->set_flashdata('error', lang('nothing_found'));
-            redirect($_SERVER["HTTP_REFERER"]);
+            redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('reports'));
         } else {
 
             $this->load->library('datatables');
             $this->datatables->select("DATE_FORMAT(sma_sales.date, '%Y-%m-%d %T') as date,sma_sales.invoice_no,
-            sma_sales.reference_no as reference_no,biller,customer,state,
+            sma_sales.reference_no as reference_no,biller,customer,comp.state,
             IF(comp.gstn_no IS NULL or comp.gstn_no = '', '-', comp.gstn_no) as gstn_no,
             grand_total + rounding, (grand_total - total_tax ) as tax_able_amount,paid,
             (grand_total + rounding - paid) as balance, sma_payments.paid_by, payment_status,
@@ -13930,7 +13930,7 @@ window.MyHandler.setPrintRequest('<?php echo json_encode($print); ?>');
                 }
             }
             $this->session->set_flashdata('error', lang('nothing_found'));
-            // redirect($_SERVER["HTTP_REFERER"]);
+            // redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('reports'));
         } else {
 
             $si = "( SELECT 
@@ -14135,10 +14135,10 @@ window.MyHandler.setPrintRequest('<?php echo json_encode($print); ?>');
             $user_id = $this->session->userdata('user_id');
         }
         $this->data['error'] = (validation_errors()) ? validation_errors() : $this->session->flashdata('error');
-        $key = $this->data['sel_warehouse'] ? array_keys($this->data['sel_warehouse']) : 0; //Use to get Id on sel_warehouse 
+        $key = $this->data['sel_warehouse'] ? $this->data['sel_warehouse']->id : 0; //Use to get Id on sel_warehouse 
         //$config = array('show_next_prev' => TRUE, 'next_prev_url' => site_url('reports/daily_sales/' . ($this->data['sel_warehouse']? $this->data['sel_warehouse']->id : 0)), 'month_type' => 'long', 'day_type' => 'long');
 
-        $config = array('show_next_prev' => TRUE, 'next_prev_url' => site_url('reports/daily_sales_up/' . ($this->data['sel_warehouse'] ? $key[0] : 0)), 'month_type' => 'long', 'day_type' => 'long');
+        $config = array('show_next_prev' => TRUE, 'next_prev_url' => site_url('reports/daily_sales_up/' . ($this->data['sel_warehouse'] ? $key : 0)), 'month_type' => 'long', 'day_type' => 'long');
 
         $config['template'] = '{table_open}<div class="table-responsive"><table border="0" cellpadding="0" cellspacing="0" class="table table-bordered dfTable">{/table_open}
 		{heading_row_start}<tr>{/heading_row_start}
@@ -14607,7 +14607,7 @@ window.MyHandler.setPrintRequest('<?php echo json_encode($print); ?>');
                 }
             }
             $this->session->set_flashdata('error', lang('nothing_found'));
-            redirect($_SERVER["HTTP_REFERER"]);
+            redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('reports'));
         } else {
             /*
               $this->load->library('datatables');
@@ -14994,7 +14994,7 @@ window.MyHandler.setPrintRequest('<?php echo json_encode($print); ?>');
                 }
             }
             $this->session->set_flashdata('error', lang('nothing_found'));
-            redirect($_SERVER["HTTP_REFERER"]);
+            redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('reports'));
         } else {
 
             //
@@ -15330,7 +15330,7 @@ window.MyHandler.setPrintRequest('<?php echo json_encode($print); ?>');
                 }
             }
             $this->session->set_flashdata('error', lang('nothing_found'));
-            redirect($_SERVER["HTTP_REFERER"]);
+            redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('reports'));
         } else {
 
             /* $si = "( SELECT sale_id, product_id, serial_no, GROUP_CONCAT(CONCAT({$this->db->dbprefix('sale_items')}.product_name, '__', {$this->db->dbprefix('sale_items')}.quantity) SEPARATOR '___') as item_nane from {$this->db->dbprefix('sale_items')} ";
@@ -15590,7 +15590,7 @@ window.MyHandler.setPrintRequest('<?php echo json_encode($print); ?>');
                 }
             }
             $this->session->set_flashdata('error', lang('nothing_found'));
-            redirect($_SERVER["HTTP_REFERER"]);
+            redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('reports'));
         } else {
 
             $pi = "( SELECT purchase_id, product_id, (GROUP_CONCAT(CONCAT({$this->db->dbprefix('purchase_items')}.product_name, '__', {$this->db->dbprefix('purchase_items')}.quantity) SEPARATOR '___')) as item_nane from {$this->db->dbprefix('purchase_items')} ";
@@ -16122,7 +16122,7 @@ window.MyHandler.setPrintRequest('<?php echo json_encode($print); ?>');
                 }
             }
             $this->session->set_flashdata('error', lang('nothing_found'));
-            redirect($_SERVER["HTTP_REFERER"]);
+            redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('reports'));
         } else {
 
             $this->load->library('datatables');
@@ -16412,7 +16412,7 @@ window.MyHandler.setPrintRequest('<?php echo json_encode($print); ?>');
         
             // --- No data found ---
             $this->session->set_flashdata('error', lang('nothing_found'));
-            redirect($_SERVER["HTTP_REFERER"]);
+            redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('reports'));
         }
         else {
             // --- DATATABLE OUTPUT ---
@@ -16472,7 +16472,7 @@ window.MyHandler.setPrintRequest('<?php echo json_encode($print); ?>');
         if ($this->input->post('start_date')) {
             $dt = "From " . $this->input->post('start_date') . " to " . $this->input->post('end_date');
         } else {
-            $dt = "Till " . $this->input->post('end_date');
+            $dt = "Till " . ($this->input->post('end_date') ? $this->input->post('end_date') : date('Y-m-d'));
         }
         $bc = array(array('link' => base_url(), 'page' => lang('home')), array('link' => site_url('reports'), 'page' => lang('reports')), array('link' => '#', 'page' => lang('Order_Report')));
         $meta = array('page_title' => lang('Order_Report'), 'bc' => $bc);
@@ -16674,7 +16674,7 @@ window.MyHandler.setPrintRequest('<?php echo json_encode($print); ?>');
                 }
             }
             $this->session->set_flashdata('error', lang('nothing_found'));
-            redirect($_SERVER["HTTP_REFERER"]);
+            redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('reports'));
         } else {
 
             $this->load->library('datatables');
@@ -17511,7 +17511,7 @@ window.MyHandler.setPrintRequest('<?php echo json_encode($print); ?>');
                         }
                     }
                     $this->session->set_flashdata('error', lang('nothing_found'));
-                    redirect($_SERVER["HTTP_REFERER"]);
+                    redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('reports'));
                 } else {
                     $this->load->library('datatables');
                     if ($FilterSaleType == 'No_sale') {
@@ -17897,7 +17897,7 @@ window.MyHandler.setPrintRequest('<?php echo json_encode($print); ?>');
                         }
                     }
                     $this->session->set_flashdata('error', lang('nothing_found'));
-                    redirect($_SERVER["HTTP_REFERER"]);
+                    redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('reports'));
                 } else {
                     $this->load->library('datatables');
                     if ($FilterSaleType == 'No_sale') {
@@ -18136,7 +18136,7 @@ window.MyHandler.setPrintRequest('<?php echo json_encode($print); ?>');
                         }
                     }
                     $this->session->set_flashdata('error', lang('nothing_found'));
-                    redirect($_SERVER["HTTP_REFERER"]);
+                    redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('reports'));
                 } else {
 
                     $this->load->library('datatables');
@@ -19283,6 +19283,8 @@ window.MyHandler.setPrintRequest('<?php echo json_encode($print); ?>');
 
             function getProductsLedgers() {
                 $this->sma->checkPermissions('products', TRUE);
+                $purchase_where = array();
+                $transactionData = array();
                 $product = isset($_REQUEST['product']) ? $_REQUEST['product'] : NULL;
                 $category = isset($_REQUEST['category']) ? $_REQUEST['category'] : NULL;
                 $brand = isset($_REQUEST['brand']) ? $_REQUEST['brand'] : NULL;
@@ -19587,7 +19589,7 @@ window.MyHandler.setPrintRequest('<?php echo json_encode($print); ?>');
                 }
             }
             $this->session->set_flashdata('error', lang('nothing_found'));
-            redirect($_SERVER["HTTP_REFERER"]);
+            redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('reports'));
         } else {
 
             if (is_array($transactionData)) {
@@ -19679,27 +19681,27 @@ window.MyHandler.setPrintRequest('<?php echo json_encode($print); ?>');
     public function load_ajax_reports() {
 
         $postData = $_POST;
-        switch ($_POST['action']) {
+        switch ($this->input->post('action')) {
             case "ProductsTransactionsReport":
-                $this->getProductsTransactionsReport($postData);
+                $this->getProductsTransactionsReport();
 
                 break;
 
             case "ProductsLedgers":
-                $this->getProductsLedgers($postData);
+                $this->getProductsLedgers();
 
                 break;
 
             case "CustomerLedgers":
-                $this->getCustomerLedger($postData);
+                $this->getCustomerLedger();
 
                 break;
             case "CustomerLedgersV1":
-                $this->getCustomerLedgerV1($postData);
+                $this->getCustomerLedgerV1();
 
                 break;
             case "CustomerDepositLadger":
-                $this->getCustomerDepositLedger($postData);
+                $this->getCustomerDepositLedger();
                 break;
             default:
                 break;
@@ -19722,7 +19724,7 @@ window.MyHandler.setPrintRequest('<?php echo json_encode($print); ?>');
             $warehouses = $this->site->getAllWarehouses();
         }
        
-        $user = $this->ion_auth->user($id)->row();
+        $user = $this->ion_auth->user($this->session->userdata('user_id'))->row();
         $this->data['warehouses_id']     =  $user->warehouse_id;
             $warehouse_id = explode(",", $user->warehouse_id);
             if (!$this->Owner && !$this->Admin) {
@@ -20000,7 +20002,7 @@ window.MyHandler.setPrintRequest('<?php echo json_encode($print); ?>');
             }
         
             $this->session->set_flashdata('error', lang('nothing_found'));
-            redirect($_SERVER["HTTP_REFERER"]);
+            redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('reports'));
         }
         
         else {
@@ -20223,7 +20225,7 @@ window.MyHandler.setPrintRequest('<?php echo json_encode($print); ?>');
 
 
             $this->session->set_flashdata('error', lang('nothing_found'));
-            redirect($_SERVER["HTTP_REFERER"]);
+            redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('reports'));
         }    else {
 
             $this->load->library('datatables');
@@ -20294,9 +20296,16 @@ window.MyHandler.setPrintRequest('<?php echo json_encode($print); ?>');
         $customer_id = isset($_REQUEST['customer']) ? $_REQUEST['customer'] : NULL;
         $start_date = isset($_REQUEST['start_date']) ? $_REQUEST['start_date'] : NULL;
         $end_date = isset($_REQUEST['end_date']) ? $_REQUEST['end_date'] : NULL;
+        $startDate = NULL;
+        $enddate = NULL;
         if ($start_date) {
-            $startDate = trim($this->sma->fld($start_date));
-            $enddate = trim($end_date ? $this->sma->fld($end_date) : date('Y-m-d'));
+            if (preg_match('/^\d{4}-\d{2}-\d{2}/', $start_date)) {
+                $startDate = substr($start_date, 0, 10);
+                $enddate = ($end_date && preg_match('/^\d{4}-\d{2}-\d{2}/', $end_date)) ? substr($end_date, 0, 10) : date('Y-m-d');
+            } else {
+                $startDate = trim($this->sma->fld($start_date));
+                $enddate = trim($end_date ? $this->sma->fld($end_date) : date('Y-m-d'));
+            }
         }
 
         $transactionData = $this->reports_model->getCustomerLedger($customer_id, $startDate, $enddate);
@@ -20510,9 +20519,11 @@ window.MyHandler.setPrintRequest('<?php echo json_encode($print); ?>');
                 }
             }
             $this->session->set_flashdata('error', lang('nothing_found'));
-            redirect($_SERVER["HTTP_REFERER"]);
+            redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('reports'));
         } else {
-            $countData = count($getData);
+            $page = $this->input->post('page') ? (int) $this->input->post('page') : 1;
+            $transactionData = is_array($transactionData) ? $transactionData : array();
+            $countData = count($transactionData);
 
             $totalRows = $countData;    
             $per_page_rows = 10;
@@ -20765,7 +20776,7 @@ window.MyHandler.setPrintRequest('<?php echo json_encode($print); ?>');
 
 
             $this->session->set_flashdata('error', lang('nothing_found'));
-            redirect($_SERVER["HTTP_REFERER"]);
+            redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('reports'));
         } else {
 
             $this->load->library('datatables');
@@ -20903,7 +20914,7 @@ window.MyHandler.setPrintRequest('<?php echo json_encode($print); ?>');
                 }
                 
                 $this->session->set_flashdata('error', lang('nothing_found'));
-                redirect($_SERVER["HTTP_REFERER"]);
+                redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('reports'));
                 
         } else {
         
@@ -21139,7 +21150,7 @@ window.MyHandler.setPrintRequest('<?php echo json_encode($print); ?>');
                 }*/
             }
             $this->session->set_flashdata('error', lang('nothing_found'));
-            redirect($_SERVER["HTTP_REFERER"]);
+            redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('reports'));
         } elseif($this->pos_settings->supercash_amount != 1) {
 
             $tableHeader = '<table class="table table-striped table-bordered table-condensed table-hover dfTable reports-table" style="margin-bottom:5px;">
@@ -21355,6 +21366,7 @@ window.MyHandler.setPrintRequest('<?php echo json_encode($print); ?>');
         $paid = '';
         $invoice_amount = '';
 
+        if ($dueSales) {
         foreach ($dueSales as  $dueSale) {
             $id = $dueSale->id;
             $grand_total += $dueSale->grand_total;
@@ -21363,9 +21375,10 @@ window.MyHandler.setPrintRequest('<?php echo json_encode($print); ?>');
             $invoice_amount  = $dueSale->grand_total;
             // $sales= $this->reports_model->getSalesDueTotals($dueSale->id);
         }
+        }
        
-        $sale = $this->reports_model->getInvoiceByID($id);
-        if ($sale->payment_status == 'paid' && $sale->grand_total == $sale->paid) {
+        $sale = $id ? $this->reports_model->getInvoiceByID($id) : null;
+        if ($sale && $sale->payment_status == 'paid' && $sale->grand_total == $sale->paid) {
             $this->session->set_flashdata('error', lang("sale_already_paid"));
             $this->sma->md();
         }
@@ -21383,7 +21396,7 @@ window.MyHandler.setPrintRequest('<?php echo json_encode($print); ?>');
                 $customer_id = $sale->customer_id;
                 if (!$this->site->check_customer_deposit($customer_id, $this->input->post('amount-paid'))) {
                     $this->session->set_flashdata('error', lang("amount_greater_than_deposit"));
-                    redirect($_SERVER["HTTP_REFERER"]);
+                    redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('reports'));
                 }
             } else {
                 $customer_id = null;
@@ -21423,7 +21436,7 @@ window.MyHandler.setPrintRequest('<?php echo json_encode($print); ?>');
                 if (!$this->upload->do_upload()) {
                     $error = $this->upload->display_errors();
                     $this->session->set_flashdata('error', $error);
-                    redirect($_SERVER["HTTP_REFERER"]);
+                    redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('reports'));
                 }
                 $photo = $this->upload->file_name;
                 $payment['attachment'] = $photo;
@@ -21432,12 +21445,12 @@ window.MyHandler.setPrintRequest('<?php echo json_encode($print); ?>');
             //$this->sma->print_arrays($payment);
         } elseif ($this->input->post('add_payment')) {
             $this->session->set_flashdata('error', validation_errors());
-            redirect($_SERVER["HTTP_REFERER"]);
+            redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('reports'));
         }
 
         if ($this->form_validation->run() == true && $this->reports_model->addPayment($payment, $customer_id, $invoice_amount,$dueSales)) {
             $this->session->set_flashdata('message', lang("payment_added"));
-            redirect($_SERVER["HTTP_REFERER"]);
+            redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('reports'));
         } else {
 
             $this->data['error'] = (validation_errors() ? validation_errors() : $this->session->flashdata('error'));
@@ -22173,9 +22186,9 @@ window.MyHandler.setPrintRequest('<?php echo json_encode($print); ?>');
             }
             else{
                 $this->session->set_flashdata('error', lang('nothing_found'));
-                redirect($_SERVER["HTTP_REFERER"]);
+                redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('reports'));
             }
-            // redirect($_SERVER["HTTP_REFERER"]);
+            // redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('reports'));
         } else {
             
             // Handle warehouse selection - default to all warehouses if none selected
@@ -23588,7 +23601,7 @@ window.MyHandler.setPrintRequest('<?php echo json_encode($print); ?>');
                 }
             }
             $this->session->set_flashdata('error', lang('nothing_found'));
-            redirect($_SERVER["HTTP_REFERER"]);
+            redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('reports'));
         } else {         
             if ($this->input->get('warehouse')) {
                 $getwarehouse = str_replace("_", ",", $this->input->get('warehouse'));
@@ -24220,7 +24233,7 @@ window.MyHandler.setPrintRequest('<?php echo json_encode($print); ?>');
                 }
             }
             $this->session->set_flashdata('error', lang('nothing_found'));
-            redirect($_SERVER["HTTP_REFERER"]);
+            redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('reports'));
         }else {
 
             $this->load->library('datatables');
@@ -24411,8 +24424,13 @@ window.MyHandler.setPrintRequest('<?php echo json_encode($print); ?>');
         $enddate   = NULL;
 
         if ($start_date) {
-            $startDate = trim($this->sma->fld($start_date));
-            $enddate   = trim($end_date ? $this->sma->fld($end_date) : date('Y-m-d'));
+            if (preg_match('/^\d{4}-\d{2}-\d{2}/', $start_date)) {
+                $startDate = substr($start_date, 0, 10);
+                $enddate = ($end_date && preg_match('/^\d{4}-\d{2}-\d{2}/', $end_date)) ? substr($end_date, 0, 10) : date('Y-m-d');
+            } else {
+                $startDate = trim($this->sma->fld($start_date));
+                $enddate   = trim($end_date ? $this->sma->fld($end_date) : date('Y-m-d'));
+            }
         }
        
 
@@ -24621,7 +24639,7 @@ window.MyHandler.setPrintRequest('<?php echo json_encode($print); ?>');
             $sortDir    = 'asc';
             if (empty($transactionData)) {
                 $this->session->set_flashdata('error', lang('nothing_found'));
-                redirect($_SERVER["HTTP_REFERER"]);
+                redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('reports'));
             }
 
             $this->load->library('excel');
@@ -25603,7 +25621,7 @@ window.MyHandler.setPrintRequest('<?php echo json_encode($print); ?>');
                 }
             }
             $this->session->set_flashdata('error', lang('nothing_found'));
-            redirect($_SERVER["HTTP_REFERER"]);
+            redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('reports'));
         } else {
 
             $this->load->library('datatables');
@@ -25924,7 +25942,7 @@ window.MyHandler.setPrintRequest('<?php echo json_encode($print); ?>');
            }
 
            $this->session->set_flashdata('error', lang('nothing_found'));
-           redirect($_SERVER["HTTP_REFERER"]);
+           redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('reports'));
        } else {
 
            $this->load->library('datatables');

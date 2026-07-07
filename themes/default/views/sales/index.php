@@ -5,7 +5,7 @@ $warehouseIds = is_numeric($warehouse_id) ? '/'.$warehouse_id : '';
 <script>
     <?php 
         if($Settings->send_sales_excel){
-          if($_SESSION['Send_Excel']==1){ ?>
+          if(!empty($_SESSION['Send_Excel']) && $_SESSION['Send_Excel']==1){ ?>
               $.ajax({
                       type:'ajax',
                       method:'get',
@@ -24,7 +24,7 @@ $warehouseIds = is_numeric($warehouse_id) ? '/'.$warehouse_id : '';
 
     <?php 
         if($Settings->synced_data_sales){
-           if($_SESSION['Send_Notification']['status']==1){
+           if(!empty($_SESSION['Send_Notification']['status']) && $_SESSION['Send_Notification']['status']==1){
     ?>    
             $.ajax({
                 type:'ajax',

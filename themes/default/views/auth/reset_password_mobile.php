@@ -181,14 +181,14 @@
             <h3 class="text-center">Reset Password</h3>
             <h4 class="text-center">Create a new password for your account</h4>
             
-            <?php if ($error) { ?>
+            <?php if (!empty($error)) { ?>
             <div class="alert alert-danger">
                 <button data-dismiss="alert" class="close" type="button">×</button>
                 <ul class="list-group"><?= $error; ?></ul>
             </div>
             <?php } ?>
             
-            <?php if ($message) { ?>
+            <?php if (!empty($message)) { ?>
             <div class="alert alert-success">
                 <button data-dismiss="alert" class="close" type="button">×</button>
                 <ul class="list-group"><?= $message; ?></ul>

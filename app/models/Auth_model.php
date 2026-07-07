@@ -613,9 +613,10 @@ class Auth_model extends CI_Model
                 }
                 if ($this->Settings->single_login) {
                     $userID_Length = strlen($user->id);
-                    $now = time() - (10);
-                    $statement = 'SELECT session_id FROM app_sessions WHERE last_activity >= ".$now." AND user_data LIKE \'%s:7:"user_id";s:' . $userID_Length . ':"' . $user->id . '";%\'';
-                    $sq = $this->db->query($statement);
+                    $now = time() - 10;
+                    $this->db->where('last_activity >=', $now);
+                    $this->db->like('user_data', 's:7:"user_id";s:' . $userID_Length . ':"' . $user->id . '";', 'both');
+                    $sq = $this->db->get('app_sessions');
 
                     if ($sq->num_rows() > 0) {
                         $ss = $sq->result();

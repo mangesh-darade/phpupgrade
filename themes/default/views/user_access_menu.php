@@ -3,6 +3,11 @@ $CI = &get_instance();
 if (!isset($GP) || !is_array($GP)) {
     $GP = (isset($CI->GP) && is_array($CI->GP)) ? $CI->GP : array();
 }
+$is_urbanpiper_active = !empty($is_urbanpiper_active);
+$segment1 = isset($segment1) ? $segment1 : $CI->uri->segment(1);
+$segment2 = isset($segment2) ? $segment2 : $CI->uri->segment(2);
+$active_item = isset($active_item) ? $active_item : '';
+$active_dropdown = isset($active_dropdown) ? $active_dropdown : '';
 ?>
 <?php if ($Settings->active_omnichannel) { ?>
     <!-- Urbanpiper -->

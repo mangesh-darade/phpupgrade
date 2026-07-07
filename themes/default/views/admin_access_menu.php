@@ -1,4 +1,5 @@
 <?php if($Settings->active_omnichannel) { ?>
+<?php $active_dropdown = isset($active_dropdown) ? $active_dropdown : ''; $active_item = isset($active_item) ? $active_item : ''; ?>
     <!--  Urbanpiper -->
     <li class="mm_urban_piper">
         <a class="dropmenu" href="#">
@@ -188,7 +189,7 @@
             </a>
         </li>
         <?php } ?>
-        <?php if (($Settings->product_batch_setting > 0 && $GP['products-batches']) || $Owner || $Admin) { ?>
+        <?php if ($Owner || $Admin || ($Settings->product_batch_setting > 0 && !empty($GP['products-batches']))) { ?>
             <li id="products_batches" class="list-item">
                 <a href="<?= site_url('products/batches') ?>" class="item">
                     <i class="fa fa-database item"></i><span
@@ -684,7 +685,7 @@ $show_attendance_menu_adm = $attendance_module_enabled_adm && (!empty($Owner) ||
                     <i class="fa fa-exchange item"></i><span class="text item"> Vendors Stock Report </span>
                 </a>
             </li>
-            <?php if ($GP['raw_materials']) { ?>
+            <?php if ($Owner || $Admin || !empty($GP['raw_materials'])) { ?>
                 <li id="raw_materials_job_works" class="list-item">
                     <a href="<?= site_url('products/rawMaterials') ?>">
                         <i class="fa fa-database"></i><span class="text"> <?= lang('List_Raw_Material_Products'); ?></span> 

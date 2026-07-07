@@ -162,14 +162,14 @@ function row_status($x)
                 <div class="row">
                     <div class="col-md-12">
                         <ul id="dbTab" class="nav nav-tabs">
-                            <?php if ($Owner || $Admin || $GP['apinotify-index']) { ?>
+                            <?php if ($Owner || $Admin || !empty($GP['apinotify-index'])) { ?>
                             <li class=""><a href="#apinotify"> <?= lang('notifications') ?></a></li>
                             <?php } ?>
                         </ul>
 
                         <div class="tab-content">
                         
-                            <?php if ($Owner || $Admin || $GP['apinotify-index']) { ?>
+                            <?php if ($Owner || $Admin || !empty($GP['apinotify-index'])) { ?>
 
                             <div id="apinotify" class="tab-pane fade in">
                                 <div class="row">
@@ -260,49 +260,49 @@ function row_status($x)
                 <h2 class="blue"><i class="fa fa-th"></i><span class="break"></span><?= lang('quick_links') ?></h2>
             </div>
             <div class="box-content">
-            <?php if ($GP['products-index']) { ?>
+            <?php if (!empty($GP['products-index'])) { ?>
                 <div class="col-lg-1 col-md-2 col-xs-6">
                     <a class="bblue white quick-button small" href="<?= site_url('products') ?>">
                         <i class="fa fa-barcode"></i>
                         <p><?= lang('products') ?></p>
                     </a>
                 </div>
-            <?php } if ($GP['sales-index']) { ?>
+            <?php } if (!empty($GP['sales-index'])) { ?>
                 <div class="col-lg-1 col-md-2 col-xs-6">
                     <a class="bdarkGreen white quick-button small" href="<?= site_url('sales') ?>">
                         <i class="fa fa-heart"></i>
                         <p><?= lang('sales') ?></p>
                     </a>
                 </div>
-            <?php } if ($GP['quotes-index']) { ?>
+            <?php } if (!empty($GP['quotes-index'])) { ?>
                 <div class="col-lg-1 col-md-2 col-xs-6">
                     <a class="blightOrange white quick-button small" href="<?= site_url('quotes') ?>">
                         <i class="fa fa-heart-o"></i>
                         <p><?= lang('quotes') ?></p>
                     </a>
                 </div>
-            <?php } if ($GP['purchases-index']) { ?>
+            <?php } if (!empty($GP['purchases-index'])) { ?>
                 <div class="col-lg-1 col-md-2 col-xs-6">
                     <a class="bred white quick-button small" href="<?= site_url('purchases') ?>">
                         <i class="fa fa-star"></i>
                         <p><?= lang('purchases') ?></p>
                     </a>
                 </div>
-            <?php } if ($GP['transfers-index']) { ?>
+            <?php } if (!empty($GP['transfers-index'])) { ?>
                 <div class="col-lg-1 col-md-2 col-xs-6">
                     <a class="bpink white quick-button small" href="<?= site_url('transfers') ?>">
                         <i class="fa fa-star-o"></i>
                         <p><?= lang('transfers') ?></p>
                     </a>
                 </div>
-            <?php } if ($GP['customers-index']) { ?>
+            <?php } if (!empty($GP['customers-index'])) { ?>
                 <div class="col-lg-1 col-md-2 col-xs-6">
                     <a class="bgrey white quick-button small" href="<?= site_url('customers') ?>">
                         <i class="fa fa-users"></i>
                         <p><?= lang('customers') ?></p>
                     </a>
                 </div>
-            <?php } if ($GP['suppliers-index']) { ?>
+            <?php } if (!empty($GP['suppliers-index'])) { ?>
                 <div class="col-lg-1 col-md-2 col-xs-6">
                     <a class="bgrey white quick-button small" href="<?= site_url('suppliers') ?>">
                         <i class="fa fa-users"></i>
@@ -329,23 +329,23 @@ function row_status($x)
                     <div class="col-md-12">
 
                         <ul id="dbTab" class="nav nav-tabs latest_five" id = "latest_five">
-                            <?php if ($Owner || $Admin || $GP['sales-index']) { ?>
+                            <?php if ($Owner || $Admin || !empty($GP['sales-index'])) { ?>
                             <li class="" data-value="sales"><a href="#sales"><?= lang('sales') ?></a></li>
-                            <?php } if ($Owner || $Admin || $GP['quotes-index']) { ?>
+                            <?php } if ($Owner || $Admin || !empty($GP['quotes-index'])) { ?>
                             <li class=""  data-value="quotes"><a href="#quotes"><?= lang('quotes') ?></a></li>
-                            <?php } if ($Owner || $Admin || $GP['apinotify-index']) { ?>
+                            <?php } if ($Owner || $Admin || !empty($GP['apinotify-index'])) { ?>
                             <li class="" data-value="purchases"><a href="#purchases"><?= lang('purchases') ?></a></li>
-                            <?php } if ($Owner || $Admin || $GP['transfers-index']) { ?>
+                            <?php } if ($Owner || $Admin || !empty($GP['transfers-index'])) { ?>
                             <li class="" data-value="transfers"><a href="#transfers"><?= lang('transfers') ?></a></li>
-                            <?php } if ($Owner || $Admin || $GP['customers-index']) { ?>
+                            <?php } if ($Owner || $Admin || !empty($GP['customers-index'])) { ?>
                             <li class="" data-value="customers"><a href="#customers"><?= lang('customers') ?></a></li>
-                            <?php } if ($Owner || $Admin || $GP['suppliers-index']) { ?>
+                            <?php } if ($Owner || $Admin || !empty($GP['suppliers-index'])) { ?>
                             <li class="" data-value="suppliers"><a href="#suppliers"><?= lang('suppliers') ?></a></li>
                             <?php } ?>
                         </ul>
 
                         <div class="tab-content">
-                        <?php if ($Owner || $Admin || $GP['sales-index']) { ?>
+                        <?php if ($Owner || $Admin || !empty($GP['sales-index'])) { ?>
 
                             <div id="sales" class="tab-pane fade in">
                                 <div class="row">
@@ -395,7 +395,7 @@ function row_status($x)
                                 </div>
                             </div>
 
-                            <?php } if ($Owner || $Admin || $GP['quotes-index']) { ?>
+                            <?php } if ($Owner || $Admin || !empty($GP['quotes-index'])) { ?>
 
                             <div id="quotes" class="tab-pane fade">
                                 <div class="row">
@@ -440,7 +440,7 @@ function row_status($x)
                                 </div>
                             </div>
 
-                            <?php } if ($Owner || $Admin || $GP['purchases-index']) { ?>
+                            <?php } if ($Owner || $Admin || !empty($GP['purchases-index'])) { ?>
 
                              <div id="purchases" class="tab-pane fade in">
                                 <div class="row">
@@ -486,7 +486,7 @@ function row_status($x)
                             </div>
 
 
-                            <?php } if ($Owner || $Admin || $GP['transfers-index']) { ?>
+                            <?php } if ($Owner || $Admin || !empty($GP['transfers-index'])) { ?>
 
                             <div id="transfers" class="tab-pane fade">
                                 <div class="row">
@@ -533,7 +533,7 @@ function row_status($x)
                                 </div>
                             </div>
 
-                            <?php } if ($Owner || $Admin || $GP['customers-index']) { ?>
+                            <?php } if ($Owner || $Admin || !empty($GP['customers-index'])) { ?>
 
                             <div id="customers" class="tab-pane fade in">
                                 <div class="row">
@@ -578,7 +578,7 @@ function row_status($x)
                                 </div>
                             </div>
 
-                            <?php } if ($Owner || $Admin || $GP['suppliers-index']) { ?>
+                            <?php } if ($Owner || $Admin || !empty($GP['suppliers-index'])) { ?>
 
                             <div id="suppliers" class="tab-pane fade">
                                 <div class="row">
@@ -881,8 +881,8 @@ display: none;
                         data: [
                             ['', 0],
                             ['', 0],
-                            ['<?= lang("stock_value_by_price"); ?>', <?php echo $stock->stock_by_price; ?>],
-                            ['<?= lang("stock_value_by_cost"); ?>', <?php echo $stock->stock_by_cost; ?>],
+                            ['<?= lang("stock_value_by_price"); ?>', <?php echo $stock ? $stock->stock_by_price : 0; ?>],
+                            ['<?= lang("stock_value_by_cost"); ?>', <?php echo $stock ? $stock->stock_by_cost : 0; ?>],
                         ],
                         center: [80, 42],
                         size: 80,

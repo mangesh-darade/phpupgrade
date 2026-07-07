@@ -248,7 +248,7 @@
             </div>
             <?php
                 }
-                if ($error) {
+                if (!empty($error)) {
              ?>
             <div class="alert alert-danger">
                 <button data-dismiss="alert" class="close" type="button">×</button>
@@ -256,7 +256,7 @@
             </div>
             <?php
                 }
-                if ($message) {
+                if (!empty($message)) {
              ?>
             <div class="alert alert-success">
                 <button data-dismiss="alert" class="close" type="button">×</button>
@@ -341,7 +341,7 @@
             </div>
             <div class="modal-body">
                 <?php
-                if ($error) {
+                if (!empty($error)) {
                     ?>
                     <div class="alert alert-danger">
                         <button data-dismiss="alert" class="close" type="button">×</button>
@@ -349,7 +349,7 @@
                     </div>
                     <?php
                 }
-                if ($message) {
+                if (!empty($message)) {
                     ?>
                     <div class="alert alert-success">
                         <button data-dismiss="alert" class="close" type="button">×</button>
@@ -392,7 +392,7 @@
             </div>
             <div class="modal-body">
                 <?php
-                if ($error) {
+                if (!empty($error)) {
                     ?>
                     <div class="alert alert-danger">
                         <button data-dismiss="alert" class="close" type="button">×</button>
@@ -400,7 +400,7 @@
                     </div>
                     <?php
                 }
-                if ($message) {
+                if (!empty($message)) {
                     ?>
                     <div class="alert alert-success">
                         <button data-dismiss="alert" class="close" type="button">×</button>

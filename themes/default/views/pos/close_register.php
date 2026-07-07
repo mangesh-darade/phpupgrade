@@ -57,7 +57,7 @@
                     <td width=" 300px;" style="font-weight:bold;border-bottom: 1px solid #DDD;""><h4><strong><?= lang('total_sales'); ?>:</strong></h4></td>
                     <td width=" 200px;" style="font-weight:bold;text-align:right; border-bottom: 1px solid #DDD;""><h4>
                           <!--<span><strong><?= $this->sma->formatMoney($totalsales->total ? $totalsales->total + $duesales->duetotal + str_replace("-", '', $refunds->returned) : '0.00') ?></strong> </span>-->
-                          <span><strong><?= $this->sma->formatMoney($totalsales->paid ? $totalsales->paid + $duesales->duetotal  : '0.00') ?></strong> </span>
+                          <span><strong><?= $this->sma->formatMoney($totalsales->paid ? $totalsales->paid + ($duesales->duetotal ?? 0)  : '0.00') ?></strong> </span>
                             <!--<span><?= $this->sma->formatMoney($totalsales->paid ? $totalsales->paid : '0.00') . ' (' . $this->sma->formatMoney($totalsales->total ? $totalsales->total : '0.00') . ')'; ?></span>-->
                         </h4></td>
                 </tr>
@@ -65,7 +65,7 @@
                 <tr>
                     <td width=" 300px;" style="font-weight:bold; border-bottom: 1px solid #DDD;""><h4><strong><?= lang('Total Due'); ?>: </strong></h4></td>
                     <td width=" 200px;" style="font-weight:bold;text-align:right; border-bottom: 1px solid #DDD;""><h4>
-                            <span><strong><?= $this->sma->formatMoney($duesales->duetotal + $duepartial->partial_due) ?> </strong></span>
+                            <span><strong><?= $this->sma->formatMoney(($duesales->duetotal ?? 0) + ($duepartial->partial_due ?? 0)) ?> </strong></span>
                           
                         </h4></td>
                 </tr>   

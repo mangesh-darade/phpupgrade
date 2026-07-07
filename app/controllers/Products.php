@@ -444,7 +444,8 @@ class Products extends MY_Controller {
                 $product = $this->products_model->getProductWithCategory($exppro[0]);
                 $unitname = $this->db->select('code')->where('id', $product->unit)->get('sma_units')->row()->code;
                 $product->price = $this->input->post('check_promo') ? ($product->promotion ? $product->promo_price : $product->price) : $product->price;
-                $colors = array_values($this->products_model->getProductOptionsByGroupId($pid, 2));
+                $colorsRaw = $this->products_model->getProductOptionsByGroupId($pid, 2);
+                $colors = is_array($colorsRaw) ? array_values($colorsRaw) : array();
                 if ($variants = $this->products_model->getProductOptionsByName($pid,$option_name)) {
                     foreach ($variants as $option) {
                         $all_variants = $this->products_model->getProductOptionsByGroupId($pid, 1);
@@ -603,7 +604,8 @@ class Products extends MY_Controller {
                 if ($product = $this->site->getProductByIDwithBatchAndWarehouse($product_id,$warehouse_ids)) {
                     $selected_variants = false;
                     $variants = $this->products_model->getProductOptionswithbatchAndWarehous($product->id,$warehouse_ids, 1);
-                    $colors = array_values($this->products_model->getProductOptionsByGroupId($product->id, 2));
+                    $colorsRaw = $this->products_model->getProductOptionsByGroupId($product->id, 2);
+                    $colors = is_array($colorsRaw) ? array_values($colorsRaw) : array();
                     $pr = [];
                     if (!empty($variants)) {
                         foreach ($variants as $variant) {
@@ -688,11 +690,12 @@ class Products extends MY_Controller {
                     foreach ($products as $row) {
 
                         // Color options (group_id = 2, from options table)
-                        $colors = array_values($this->products_model->getProductOptionsByGroupId($row->id, 2));
+                        $colorsRaw = $this->products_model->getProductOptionsByGroupId($row->id, 2);
+                        $colors = is_array($colorsRaw) ? array_values($colorsRaw) : array();
                         $color_name = (!empty($colors)) ? $colors[0]->name : '';
 
-                        // Variants for this product (SIZE only, group_id = 1)
-                        $variants = array_values($this->products_model->getProductOptionsByGroupId($row->id, 1));
+                        $variantsRaw = $this->products_model->getProductOptionsByGroupId($row->id, 1);
+                        $variants = is_array($variantsRaw) ? array_values($variantsRaw) : array();
 
                         if ($variants) {
                             // One bcitems row PER VARIANT
@@ -997,7 +1000,7 @@ class Products extends MY_Controller {
                 'eshop_price' => $this->sma->formatDecimal(round($eshop_price)),
 				'shelf_life' => $this->input->post('shelf_life'),
                 'storage_conditions' => $this->input->post('storage_conditions'),
-                'season_id' => $this->input->post('season'),
+                'season_id' => $this->input->post('season') !== null && $this->input->post('season') !== '' ? $this->input->post('season') : 0,
                 'rank' => $this->input->post('rank'),
                 'flag_visible' => $this->input->post('flag_visible'),
                 'discount_on_mrp' => $this->input->post('discount_on_mrp'),
@@ -1371,9 +1374,11 @@ class Products extends MY_Controller {
                 }
             } else {
 
+            if (isset($_SERVER['HTTP_REFERER'])) {
             $exppurl = explode('/', $_SERVER['HTTP_REFERER']);
             $lasturl = count($exppurl) - 1;
             $_SESSION['lastRedirect'] = $exppurl[$lasturl - 1] . '/' . $exppurl[$lasturl];
+            }
 
 
             $this->data['error'] = (validation_errors() ? validation_errors() : $this->session->flashdata('error'));
@@ -1387,8 +1392,9 @@ class Products extends MY_Controller {
             $this->data['warehouses_products'] = $id ? $this->products_model->getAllWarehousesWithPQ($id) : NULL;
             $this->data['product'] = $id ? $this->products_model->getProductByID($id) : NULL;
             $this->data['variants'] = $this->products_model->getAllVariants();
-            $this->data['combo_items'] = ($id && $this->data['product']->type == 'combo') ? $this->products_model->getProductComboItems($id) : NULL;
-            $this->data['combo_items'] = ($id && $this->data['product']->type == 'Bundle') ? $this->products_model->getProductComboItems($id) : NULL;
+            $productType = ($id && $this->data['product']) ? $this->data['product']->type : null;
+            $this->data['combo_items'] = ($id && $productType == 'combo') ? $this->products_model->getProductComboItems($id) : NULL;
+            $this->data['combo_items'] = ($id && $productType == 'Bundle') ? $this->products_model->getProductComboItems($id) : NULL;
             $this->data['product_options'] = $id ? $this->products_model->getProductOptionsByGroupId($id, 1) : NULL;
             $this->data['product_color'] =  $id ? $this->products_model->getProductOptionsByGroupId($id, 2) : NULL;
             $this->data['variants_color'] = $this->products_model->getAllVariants1(2);
@@ -1566,16 +1572,18 @@ class Products extends MY_Controller {
       
         $rows = $this->products_model->getProductsForPrinting($term, 15);
         if ($rows) {
+            $size = '';
+            $color = '';
             foreach ($rows as $row) {
                 $c = rand(1000, 9999);
                 $variants = $this->products_model->getProductOptionsByGroupId($row->id, 1);
-                // $colors = $this->products_model->getProductOptionsByGroupId($row->id, 2);
-                $colors = array_values($this->products_model->getProductOptionsByGroupId($row->id, 2));
+                $colorsRaw = $this->products_model->getProductOptionsByGroupId($row->id, 2);
+                $colors = is_array($colorsRaw) ? array_values($colorsRaw) : array();
                 $product = $this->site->getProductByID($row->id);
 
                 // Prepare option_id (primary variant) if available
                 if (!isset($option_id) || !$option_id) {
-                    $option_id = ($variants && $product->primary_variant) ? $product->primary_variant : 0; // Set primary variant
+                    $option_id = ($variants && $product && $product->primary_variant) ? $product->primary_variant : 0; // Set primary variant
                 }
 
                 // Attach batch-wise data to variants, using the same helper as barcode flows
@@ -1697,7 +1705,7 @@ class Products extends MY_Controller {
         $product = $this->site->getProductByID($id);
         if (!$id || !$product) {
             $this->session->set_flashdata('error', lang('prduct_not_found'));
-            redirect($_SERVER["HTTP_REFERER"]);
+            redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('products'));
         }
 
         /**
@@ -2330,6 +2338,7 @@ class Products extends MY_Controller {
             $this->data['product_variants'] = $this->products_model->getProductOptionsByGroupId($id, 1);
             $this->data['combo_items'] = $product->type == 'combo' ? $this->products_model->getProductComboItems($product->id) : NULL;
             $this->data['combo_items'] = $product->type == 'Bundle' ? $this->products_model->getProductComboItems($product->id) : NULL;
+            if (!empty($this->data['combo_items'])) {
             foreach ($this->data['combo_items'] as $item) {
                 if ($item->variant_id != 0) {
                     $item->product_name = $item->name;
@@ -2340,6 +2349,7 @@ class Products extends MY_Controller {
                         $item->name = $options->name;
                     }
                 }
+            }
             }
             $this->data['product_options'] = $id ? $this->products_model->getProductOptionsWithWH($id, 1) : NULL;
             $this->data['product_options_color'] = $id ? $this->products_model->getProductOptionsByGroupId($id, 2) : NULL;
@@ -3161,7 +3171,7 @@ class Products extends MY_Controller {
                 die();
             }
             $this->session->set_flashdata('error', lang("Product can't be deleted because it is already used in transactions"));
-            redirect($_SERVER["HTTP_REFERER"]);
+            redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('products'));
         }else{
             if ($this->products_model->deleteProduct($id)) {
                 if ($this->input->is_ajax_request()) {
@@ -3254,8 +3264,10 @@ class Products extends MY_Controller {
 
             $reference_no = $this->input->post('reference_no') ? $this->input->post('reference_no') : $this->site->getReference('qa');
             $warehouse_id = $this->input->post('warehouse');
-            $notebill = $this->sma->clear_tags(strip_tags($this->input->post('note')));
+            $note_post = $this->input->post('note');
+            $notebill = $this->sma->clear_tags(strip_tags(is_array($note_post) ? '' : (string) $note_post));
 
+            $products = array();
             $i = isset($_POST['product_id']) ? sizeof($_POST['product_id']) : 0;
 
             for ($r = 0; $r < $i; $r++) {
@@ -3267,7 +3279,7 @@ class Products extends MY_Controller {
                 $cost = $_POST['cost'][$r];
                 $price = $_POST['price'][$r];
                 $real_unit_cost = $_POST['real_unit_cost'][$r];
-                $expiry = $_POST['expiry'][$r];
+                $expiry = isset($_POST['expiry'][$r]) ? $_POST['expiry'][$r] : '';
                 $tax_rate_id = $_POST['tax_rate_id'][$r];
                 $tax_method = $_POST['tax_method'][$r];
                 $product_type = $_POST['product_type'][$r];
@@ -3280,7 +3292,7 @@ class Products extends MY_Controller {
                 $item_qty = (isset($_POST['item_qty'][$r]) && $_POST['item_qty'][$r] != '') ? $_POST['item_qty'][$r] : 0;
                 $type = isset($_POST['type'][$r]) ? $_POST['type'][$r] : 'subtraction';
                 $quantity = $_POST['quantity'][$r];
-                $note = $_POST['note'][$r];
+                $note = isset($_POST['note'][$r]) ? $_POST['note'][$r] : '';
                 $product_option_color = (isset($_POST['product_option_color'][$r]) && $_POST['product_option_color'][$r] != '') ? $_POST['product_option_color'][$r] : 0;
 
                 $batchData = FALSE;
@@ -3320,7 +3332,7 @@ class Products extends MY_Controller {
                         } else {
                             // Do not allow creating new batches from adjustment; enforce validation
                             $this->session->set_flashdata('error', "Batch number '" . $item_batch_number . "' not found for product '" . $product_name . "'");
-                            redirect($_SERVER["HTTP_REFERER"]);
+                            redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('products'));
                         }
                     }
                 } elseif ($this->Settings->product_batch_setting == 2 && empty($item_batch_number)) {
@@ -3345,7 +3357,7 @@ class Products extends MY_Controller {
                     if ($itemStocks < $quantity) {
                         $errorMsg = (($batchData !== FALSE) ? lang('warehouse_option_batch_qty_is_less_than_damage') : lang('warehouse_option_qty_is_less_than_damage'));
                         $this->session->set_flashdata('error', $product_name . ' : ' . $errorMsg);
-                        redirect($_SERVER["HTTP_REFERER"]);
+                        redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('products'));
                     }
                 }
 
@@ -3368,6 +3380,7 @@ class Products extends MY_Controller {
                     'unit_quantity' => ($variantData && $variant) ? $variantData['unit_quantity'] : 1,
                     'batch_number' => $item_batch_number,
                     'shade_id'          => $product_option_color,
+                    'serial_no'         => isset($_POST['serial'][$r]) ? $_POST['serial'][$r] : '',
 
                 );
             }
@@ -3380,7 +3393,7 @@ class Products extends MY_Controller {
 
             $data = array('date' => $date, 'reference_no' => $reference_no, 'warehouse_id' => $warehouse_id, 'note' => $notebill, 'created_by' => $this->session->userdata('user_id'), 'count_id' => $this->input->post('count_id') ? $this->input->post('count_id') : NULL,);
 
-            if ($_FILES['document']['size'] > 0) {
+            if (!empty($_FILES['document']['size'])) {
                 $this->load->library('upload');
                 $config['upload_path'] = $this->digital_upload_path;
                 $config['allowed_types'] = $this->digital_file_types;
@@ -3391,7 +3404,7 @@ class Products extends MY_Controller {
                 if (!$this->upload->do_upload('document')) {
                     $error = $this->upload->display_errors();
                     $this->session->set_flashdata('error', $error);
-                    redirect($_SERVER["HTTP_REFERER"]);
+                    redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('products'));
                 }
                 $photo = $this->upload->file_name;
                 $data['attachment'] = $photo;
@@ -3402,7 +3415,7 @@ class Products extends MY_Controller {
 
         
 
-        if ($this->form_validation->run() == TRUE && $this->products_model->addAdjustment($data, $products)) {    
+        if ($this->form_validation->run() == TRUE && !empty($products) && $this->products_model->addAdjustment($data, $products)) {    
             $this->session->set_userdata('remove_qals', 1);
             $this->session->set_flashdata('message', lang("quantity_adjusted"));
             redirect('products/quantity_adjustments');
@@ -3485,7 +3498,7 @@ class Products extends MY_Controller {
                 $cost = $_POST['cost'][$r];
                 $price = $_POST['price'][$r];
                 $real_unit_cost = $_POST['real_unit_cost'][$r];
-                $expiry = $_POST['expiry'][$r];
+                $expiry = isset($_POST['expiry'][$r]) ? $_POST['expiry'][$r] : '';
                 $tax_rate_id = $_POST['tax_rate_id'][$r];
                 $tax_method = $_POST['tax_method'][$r];
                 $product_type = $_POST['product_type'][$r];
@@ -3528,7 +3541,7 @@ class Products extends MY_Controller {
                             $this->site->addBatchInfo($batchDataInsert);
                         } else {
                             $this->session->set_flashdata('error', "Batch number '" . $item_batch_number . "' not found for product '" . $product_name . "'");
-                            redirect($_SERVER["HTTP_REFERER"]);
+                            redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('products'));
                         }
                     }
                 } elseif ($this->Settings->product_batch_setting == 2 && empty($item_batch_number)) {
@@ -3550,21 +3563,21 @@ class Products extends MY_Controller {
                         if ($op_wh_qty = $this->products_model->getProductWarehouseOptionQty($variant, $warehouse_id)) {
                             if ($op_wh_qty->quantity < $quantity) {
                                 $this->session->set_flashdata('error', lang('warehouse_option_qty_is_less_than_damage'));
-                                redirect($_SERVER["HTTP_REFERER"]);
+                                redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('products'));
                             }
                         } else {
                             $this->session->set_flashdata('error', lang('warehouse_option_qty_is_less_than_damage'));
-                            redirect($_SERVER["HTTP_REFERER"]);
+                            redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('products'));
                         }
                     }
                     if ($wh_qty = $this->products_model->getProductQuantity($product_id, $warehouse_id)) {
                         if ($wh_qty['quantity'] < $quantity) {
                             $this->session->set_flashdata('error', lang('warehouse_qty_is_less_than_damage'));
-                            redirect($_SERVER["HTTP_REFERER"]);
+                            redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('products'));
                         }
                     } else {
                         $this->session->set_flashdata('error', lang('warehouse_qty_is_less_than_damage'));
-                        redirect($_SERVER["HTTP_REFERER"]);
+                        redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('products'));
                     }
                 }
 
@@ -3579,7 +3592,7 @@ class Products extends MY_Controller {
 
             $data = array('date' => $date, 'reference_no' => $reference_no, 'warehouse_id' => $warehouse_id, 'note' => $note, 'created_by' => $this->session->userdata('user_id'));
 
-            if ($_FILES['document']['size'] > 0) {
+            if (!empty($_FILES['document']['size'])) {
                 $this->load->library('upload');
                 $config['upload_path'] = $this->digital_upload_path;
                 $config['allowed_types'] = $this->digital_file_types;
@@ -3590,7 +3603,7 @@ class Products extends MY_Controller {
                 if (!$this->upload->do_upload('document')) {
                     $error = $this->upload->display_errors();
                     $this->session->set_flashdata('error', $error);
-                    redirect($_SERVER["HTTP_REFERER"]);
+                    redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('products'));
                 }
                 $photo = $this->upload->file_name;
                 $data['attachment'] = $photo;
@@ -3809,7 +3822,7 @@ class Products extends MY_Controller {
                 if (!$this->upload->do_upload('csv_file')) {
                     $error = $this->upload->display_errors();
                     $this->session->set_flashdata('error', $error);
-                    redirect($_SERVER["HTTP_REFERER"]);
+                    redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('products'));
                 }
 
                 $csv = $this->upload->file_name;
@@ -3888,13 +3901,13 @@ class Products extends MY_Controller {
                         // Numeric validation
                         if (!is_numeric($csv_quantity)) {
                             $this->session->set_flashdata('error', "Line {$rw}: Quantity must be a numeric value for product '{$product->code}'.");
-                            redirect($_SERVER["HTTP_REFERER"]);
+                            redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('products'));
                         }
                         
                         // Zero quantity validation
                         if ($csv_quantity < 0) {
                             $this->session->set_flashdata('error', "Line {$rw}: Quantity cannot be negative for product '{$product->code}'.");
-                         redirect($_SERVER["HTTP_REFERER"]);
+                         redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('products'));
                         }
                         $type = $csv_quantity > 0 ? 'addition' : 'subtraction';
                         $quantity = $csv_quantity > 0 ? $csv_quantity : (0 - $csv_quantity);
@@ -3904,13 +3917,13 @@ class Products extends MY_Controller {
                         // If batch is disabled (setting 0) and batch number is provided, show error
                         if ($batch_setting == 0 && !empty($pr['batch_number'])) {
                             $this->session->set_flashdata('error', "Line {$rw}: Batch number is not allowed as batch setting is disabled for product '{$product->name}'{$variant_text}");
-                            redirect($_SERVER["HTTP_REFERER"]);
+                            redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('products'));
                         }
                         
                         // If batch is enabled (setting 1 or 2) and batch number is empty, show error
                         if (($batch_setting == 1 || $batch_setting == 2) && empty($pr['batch_number'])) {
                             $this->session->set_flashdata('error', "Line {$rw}: Batch number is required for product '{$product->name}'{$variant_text}");
-                            redirect($_SERVER["HTTP_REFERER"]);
+                            redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('products'));
                         }
                         
                         // If batch number is provided and batch setting is enabled, validate it exists
@@ -3924,7 +3937,7 @@ class Products extends MY_Controller {
                                 
                             if (!$batch) {
                                 $this->session->set_flashdata('error', "Line {$rw}: Batch number '{$pr['batch_number']}' not found for product '{$product->name}'{$variant_text}");
-                                redirect($_SERVER["HTTP_REFERER"]);
+                                redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('products'));
                             }
                         }
                     
@@ -3934,28 +3947,28 @@ class Products extends MY_Controller {
                                 if ($op_wh_qty = $this->products_model->getProductWarehouseOptionQty($variant, $warehouse_id)) {
                                     if ($op_wh_qty->quantity < $quantity) {
                                         $this->session->set_flashdata('error', lang('warehouse_option_qty_is_less_than_damage') . ' - ' . lang('line_no') . ' ' . $rw);
-                                        redirect($_SERVER["HTTP_REFERER"]);
+                                        redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('products'));
                                     }
                                 } else {
                                     $this->session->set_flashdata('error', lang('warehouse_option_qty_is_less_than_damage') . ' - ' . lang('line_no') . ' ' . $rw);
-                                    redirect($_SERVER["HTTP_REFERER"]);
+                                    redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('products'));
                                 }
                             }
                             if ($wh_qty = $this->products_model->getProductQuantity($product->id, $warehouse_id)) {
                                 if ($wh_qty['quantity'] < $quantity) {
                                     $this->session->set_flashdata('error', lang('warehouse_qty_is_less_than_damage') . ' - ' . lang('line_no') . ' ' . $rw);
-                                    redirect($_SERVER["HTTP_REFERER"]);
+                                    redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('products'));
                                 }
                             } else {
                                 $this->session->set_flashdata('error', lang('warehouse_qty_is_less_than_damage') . ' - ' . lang('line_no') . ' ' . $rw);
-                                redirect($_SERVER["HTTP_REFERER"]);
+                                redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('products'));
                             }
                         }
 
                         $products[] = array('product_id' => $product->id, 'type' => $type, 'quantity' => $quantity, 'warehouse_id' => $warehouse_id, 'option_id' => $variant,'batch_number' => !empty($pr['batch_number']) ? $pr['batch_number'] : '',);
                     } else {
                         $this->session->set_flashdata('error', lang('check_product_code') . ' (' . $pr['code'] . '). ' . lang('product_code_x_exist') . ' ' . lang('line_no') . ' ' . $rw);
-                        redirect($_SERVER["HTTP_REFERER"]);
+                        redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('products'));
                     }
                     $rw++;
                 }
@@ -4055,6 +4068,7 @@ class Products extends MY_Controller {
         $this->data['purchase'] = $this->products_model->getProductStockDetails($id);
         // $this->data['Avgcost'] = $this->Transfers_model->getCostingVariants($id);
         $optionsArray = [];
+        if (!empty($this->data['options'])) {
         foreach ($this->data['options'] as $option) {
             $optionId = $option->id;
             if (!isset($optionsArray[$optionId])) {
@@ -4068,11 +4082,14 @@ class Products extends MY_Controller {
                 ];
             }
         }
+        }
         $variantsArray = [];
+        if (!empty($this->data['variants'])) {
         foreach ($this->data['variants'] as $variant) {
             if (!isset($variantsArray[$variant->id])) {
                 $variantsArray[$variant->id] = (array) $variant;
             }
+        }
         }
         foreach ($optionsArray as &$option) {
             if (isset($variantsArray[$option['id']]) && isset($variantsArray[$option['id']]['mrp'])) {
@@ -4093,7 +4110,13 @@ class Products extends MY_Controller {
         $pr_details = $this->products_model->getProductByID($id);
         if (!$id || !$pr_details) {
             $this->session->set_flashdata('error', lang('prduct_not_found'));
-            redirect($_SERVER["HTTP_REFERER"]);
+            redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('products'));
+        }
+        if ($this->Owner || $this->Admin) {
+            $warehouse_ids = [];
+        } else {
+            $user = $this->site->getUser();
+            $warehouse_ids = ($user && $user->warehouse_id) ? explode(",", $user->warehouse_id) : [];
         }
         $this->data['barcode'] = "<img src='" . site_url('products/gen_barcode/' . $pr_details->code . '/' . $pr_details->barcode_symbology . '/40/0') . "' alt='" . $pr_details->code . "' class='pull-left' />";
         if ($pr_details->type == 'combo') {
@@ -4135,7 +4158,7 @@ class Products extends MY_Controller {
         $pr_details = $this->products_model->getProductByID($id);
         if (!$id || !$pr_details) {
             $this->session->set_flashdata('error', lang('prduct_not_found'));
-            redirect($_SERVER["HTTP_REFERER"]);
+            redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('products'));
         }
         $this->data['barcode'] = "<img src='" . site_url('products/gen_barcode/' . $pr_details->code . '/' . $pr_details->barcode_symbology . '/40/0') . "' alt='" . $pr_details->code . "' class='pull-left' />";
         if ($pr_details->type == 'combo') {
@@ -4202,7 +4225,7 @@ class Products extends MY_Controller {
         }
         if (!$this->Owner && !$this->GP['bulk_actions']) {
             $this->session->set_flashdata('warning', lang('access_denied'));
-            redirect($_SERVER["HTTP_REFERER"]);
+            redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('products'));
         }
         $user = $this->site->getUser();
         $this->form_validation->set_rules('form_action', lang("form_action"), 'required');
@@ -4216,14 +4239,14 @@ class Products extends MY_Controller {
                         $this->site->syncQuantity(NULL, NULL, NULL, $id);
                     }
                     $this->session->set_flashdata('message', $this->lang->line("products_quantity_sync"));
-                    redirect($_SERVER["HTTP_REFERER"]);
+                    redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('products'));
                 } elseif ($this->input->post('form_action') == 'fav_products') {
                     if ($this->products_model->productsMarkFavourite($_POST['val'])) {
                         $this->session->set_flashdata('message', $this->lang->line("Product Mark as Favourite"));
                     } else {
                         $this->session->set_flashdata('error', $this->lang->line("Please try again"));
                     }
-                    redirect($_SERVER["HTTP_REFERER"]);
+                    redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('products'));
                 } elseif ($this->input->post('form_action') == 'delete') {
 
                     $this->sma->checkPermissions('delete');
@@ -4259,7 +4282,7 @@ class Products extends MY_Controller {
                         $this->session->set_flashdata('error', $this->lang->line("products_deleted"));
                     }
                 
-                    redirect($_SERVER["HTTP_REFERER"]);
+                    redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('products'));
                 } elseif ($this->input->post('form_action') == 'labels') {
 
                     // Build barcode items in the same format as print_barcodes(single product)
@@ -4759,15 +4782,15 @@ class Products extends MY_Controller {
                         return $objWriter->save('php://output');
                     }
 
-                    redirect($_SERVER["HTTP_REFERER"]);
+                    redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('products'));
                 }
             } else {
                 $this->session->set_flashdata('error', $this->lang->line("no_product_selected"));
-                redirect($_SERVER["HTTP_REFERER"]);
+                redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('products'));
             }
         } else {
             $this->session->set_flashdata('error', validation_errors());
-            redirect($_SERVER["HTTP_REFERER"]);
+            redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('products'));
         }
     }
 
@@ -4808,13 +4831,22 @@ class Products extends MY_Controller {
 
         $c = str_replace(".", "", microtime(true));
         $r = 0;
+        $pr = array();
         if ($rows) {
             foreach ($rows as $row) {
 
                 $batch = $productVariantsStocks = $options = FALSE;
-                $current_batch = null; // Reset for each product to prevent contamination
+                $options_color = FALSE;
+                $productbatches = FALSE;
+                $current_batch = null;
+                $option_color_name = '';
+                $color = '';
+                $size = '';
 
                 $product = $this->site->getProductByID($row->id);
+                if (!$product) {
+                    continue;
+                }
 
                 // $row->qty = 1;
                 $row->qty = $this->input->get('quantity', true);
@@ -4885,7 +4917,7 @@ class Products extends MY_Controller {
                         }
                         $row->option_color = $option_color_id;
                         $row->option_color_name = $option_color_name;
-                        $color = $opt_color->name;
+                        $color = !empty($opt_color->name) ? $opt_color->name : '';
                         $size = $optionData->name;
                         $options[] = $optionData;
                     }
@@ -4956,7 +4988,7 @@ class Products extends MY_Controller {
     function adjustment_actions() {
         if (!$this->Owner && !$this->GP['bulk_actions']) {
             $this->session->set_flashdata('warning', lang('access_denied'));
-            redirect($_SERVER["HTTP_REFERER"]);
+            redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('products'));
         }
 
         $this->form_validation->set_rules('form_action', lang("form_action"), 'required');
@@ -4983,7 +5015,7 @@ class Products extends MY_Controller {
                         $this->products_model->deleteAdjustment($id);
                     }
                     $this->session->set_flashdata('message', $this->lang->line("adjustment_deleted"));
-                    redirect($_SERVER["HTTP_REFERER"]);
+                    redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('products'));
                 } elseif ($this->input->post('form_action') == 'export_excel' || $this->input->post('form_action') == 'export_pdf') {
 
                     $this->load->library('excel');
@@ -5090,15 +5122,15 @@ class Products extends MY_Controller {
                         return $objWriter->save('php://output');
                     }
 
-                    redirect($_SERVER["HTTP_REFERER"]);
+                    redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('products'));
                 }
             } else {
                 $this->session->set_flashdata('error', $this->lang->line("no_record_selected"));
-                redirect($_SERVER["HTTP_REFERER"]);
+                redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('products'));
             }
         } else {
             $this->session->set_flashdata('error', validation_errors());
-            redirect($_SERVER["HTTP_REFERER"]);
+            redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('products'));
         }
     }
 
@@ -5256,7 +5288,7 @@ class Products extends MY_Controller {
                 }
             }
             $this->session->set_flashdata('error', lang('nothing_found'));
-            redirect($_SERVER["HTTP_REFERER"]);
+            redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('products'));
         }
     }
 
@@ -5313,7 +5345,7 @@ class Products extends MY_Controller {
                 fclose($csv_file);
             } else {
                 $this->session->set_flashdata('error', lang('no_product_found'));
-                redirect($_SERVER["HTTP_REFERER"]);
+                redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('products'));
             }
 
             if ($this->Owner || $this->Admin) {
@@ -5403,7 +5435,7 @@ class Products extends MY_Controller {
                 if (!$this->upload->do_upload('csv_file')) {
                     $error = $this->upload->display_errors();
                     $this->session->set_flashdata('error', $error);
-                    redirect($_SERVER["HTTP_REFERER"]);
+                    redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('products'));
                 }
 
                 $csv = $this->upload->file_name;
@@ -6110,10 +6142,10 @@ class Products extends MY_Controller {
 
         if ($sync_status) {
             $this->session->set_flashdata('message', lang('Product stocks sync successfully.'));
-            redirect($_SERVER["HTTP_REFERER"]);
+            redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('products'));
         } else {
             $this->session->set_flashdata('error', lang('Product stocks sync failed'));
-            redirect($_SERVER["HTTP_REFERER"]);
+            redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('products'));
         }
     }
 

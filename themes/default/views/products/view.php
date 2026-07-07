@@ -331,6 +331,7 @@ if ($this->input->post('end_date')) {
 
                                             <?php
                                                 $colorArr = [];
+                                                if (!empty($colors)) {
                                                 foreach ($colors as $color) {
                                                     $color->name ? $colorArr[] = $color->name : '';
                                                 }
@@ -344,6 +345,7 @@ if ($this->input->post('end_date')) {
                                                         } ?>
                                                     </td>
                                                 </tr>
+                                            <?php } ?>
                                             <?php } ?>
 
                                         </tbody>

@@ -186,6 +186,7 @@
                         </thead>
                         <tbody>
                         <?php $r = 1;
+                    if (!empty($rows)) {
                         foreach ($rows as $row):
                         $offset = 6;
                             if($row->tax_code == ''){
@@ -253,6 +254,7 @@
                             <?php
                             $r++;
                         endforeach;
+                        }
                         if ($return_rows) {
                             echo '<tr class="warning"><td colspan="100%" class="no-border"><strong>'.lang('returned_items').'</strong></td></tr>';
                             foreach ($return_rows as $row):

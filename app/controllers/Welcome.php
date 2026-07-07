@@ -37,10 +37,10 @@ class Welcome extends MY_Controller
         $lmsdate = date('Y-m-d', strtotime('first day of last month')) . ' 00:00:00';
         $lmedate = date('Y-m-d', strtotime('last day of last month')) . ' 23:59:59';
         $this->data['lmbs'] = $this->db_model->getBestSeller($lmsdate, $lmedate);
+        $this->data['settings'] = $this->db_model->getSettings();
         $bc = array(array('link' => '#', 'page' => lang('dashboard')));
         $meta = array('page_title' => lang('dashboard'), 'bc' => $bc);
         $this->page_construct('dashboard', $meta, $this->data);
-        $this->data['settings'] = $this->db_model->getSettings();
  }
 
     function promotions()
@@ -107,7 +107,7 @@ class Welcome extends MY_Controller
         //$this->load->helper('cookie');
         $folder = 'app/language/';
         $languagefiles = scandir($folder);
-        if (in_array($lang, $languagefiles)) {
+        if ($languagefiles && in_array($lang, $languagefiles)) {
             $cookie = array(
                 'name' => 'language',
                 'value' => $lang,
@@ -117,7 +117,7 @@ class Welcome extends MY_Controller
             );
             $this->input->set_cookie($cookie);
         }
-        redirect($_SERVER["HTTP_REFERER"]);
+        redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url());
     }
 
     function toggle_rtl()
@@ -130,7 +130,7 @@ class Welcome extends MY_Controller
             'secure' => false
         );
         $this->input->set_cookie($cookie);
-        redirect($_SERVER["HTTP_REFERER"]);
+        redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url());
     }
 
     function download($file)
@@ -141,7 +141,7 @@ class Welcome extends MY_Controller
             exit();
         }
         $this->session->set_flashdata('error', lang('file_x_exist'));
-        redirect($_SERVER["HTTP_REFERER"]);
+        redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url());
     }
 
 }

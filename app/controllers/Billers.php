@@ -13,7 +13,7 @@ class Billers extends MY_Controller
         }
         if (!$this->Owner) {
             $this->session->set_flashdata('warning', lang('access_denied'));
-            redirect($_SERVER["HTTP_REFERER"]);
+            redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('billers'));
         }
         $this->lang->load('billers', $this->Settings->user_language);
         $this->load->library('form_validation');
@@ -160,7 +160,7 @@ class Billers extends MY_Controller
             $this->data['states'] = $this->site->getAllStates();
             $this->data['error'] = (validation_errors() ? validation_errors() : $this->session->flashdata('error'));
             $this->data['modal_js'] = $this->site->modal_js();
-            $this->data['country'] = $this->site->getCountry();
+            $this->data['country'] = $this->site->getCountry() ?: array();
             $this->data['settings'] = $this->site->get_setting();
             $cfields = $this->site->getCustomeFieldsLabel('biller') ;
             $this->data['custome_fields'] = $cfields['biller'];
@@ -178,6 +178,10 @@ class Billers extends MY_Controller
         }
 
         $company_details = $this->companies_model->getCompanyByID($id);
+        if (!$company_details) {
+            $this->session->set_flashdata('error', lang('biller_x_deleted'));
+            redirect('billers');
+        }
         if ($this->input->post('email') != $company_details->email) {
             $this->form_validation->set_rules('code', lang("email_address"), 'is_unique[companies.email]');
         }
@@ -203,8 +207,8 @@ class Billers extends MY_Controller
         }
         
         if ($this->form_validation->run('supplier/add') == true) {
-            $state = $this->input->post('state');
-            if (strpos($state, '~') !== false) {
+            $state = (string) $this->input->post('state');
+            if ($state !== '' && strpos($state, '~') !== false) {
                 $p = explode('~', $state);
                 $state = $p[0];
                 $state_code = $p[1];
@@ -257,7 +261,9 @@ class Billers extends MY_Controller
 
         if ($this->form_validation->run() == true && $this->companies_model->updateCompany($id, $data)) {
          $biller =  $this->companies_model->getCompanyByID($id);
+         if ($biller) {
         	$this->sma->saveBillerLocation($biller);
+         }
             $this->session->set_flashdata('message', $this->lang->line("biller_updated"));
             redirect("billers");
         } 
@@ -265,7 +271,7 @@ class Billers extends MY_Controller
             $this->data['biller'] = $company_details;
             $this->data['error'] = (validation_errors() ? validation_errors() : $this->session->flashdata('error'));
             $this->data['logos'] = $this->getLogoList();
-            $this->data['countries'] = $this->site->getCountry();
+            $this->data['countries'] = $this->site->getCountry() ?: array();
             $this->data['settings'] = $this->site->get_setting();
             $this->data['modal_js'] = $this->site->modal_js();
             $cfields = $this->site->getCustomeFieldsLabel('biller') ;
@@ -304,7 +310,7 @@ class Billers extends MY_Controller
             $term = $this->input->get('term', TRUE);
         }
         $limit = $this->input->get('limit', TRUE);
-        $rows['results'] = $this->companies_model->getBillerSuggestions($term, $limit);
+        $rows['results'] = $this->companies_model->getBillerSuggestions($term, $limit) ?: array();
         $this->sma->send_json($rows);
     }
 
@@ -313,6 +319,10 @@ class Billers extends MY_Controller
         $this->sma->checkPermissions('index');
 
         $row = $this->companies_model->getCompanyByID($id);
+        if (!$row) {
+            $this->sma->send_json(array());
+            return;
+        }
         $this->sma->send_json(array(array('id' => $row->id, 'text' => $row->company)));
     }
 
@@ -337,7 +347,7 @@ class Billers extends MY_Controller
     {
         if (!$this->Owner && !$this->GP['bulk_actions']) {
             $this->session->set_flashdata('warning', lang('access_denied'));
-            redirect($_SERVER["HTTP_REFERER"]);
+            redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('billers'));
         }
 
         $this->form_validation->set_rules('form_action', lang("form_action"), 'required');
@@ -360,7 +370,7 @@ class Billers extends MY_Controller
                     } else {
                         $this->session->set_flashdata('message', $this->lang->line("billers_deleted"));
                     }
-                    redirect($_SERVER["HTTP_REFERER"]);
+                    redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('billers'));
                 }
 
                 if ($this->input->post('form_action') == 'export_excel' || $this->input->post('form_action') == 'export_pdf') {
@@ -384,6 +394,9 @@ class Billers extends MY_Controller
                     $row = 3;
                     foreach ($_POST['val'] as $id) {
                         $customer = $this->site->getCompanyByID($id);
+                        if (!$customer) {
+                            continue;
+                        }
                         $this->excel->getActiveSheet()->SetCellValue('A' . $row, $customer->company);
                         $this->excel->getActiveSheet()->SetCellValue('B' . $row, $customer->name);
                         $this->excel->getActiveSheet()->SetCellValue('C' . $row, $customer->phone);
@@ -426,15 +439,15 @@ class Billers extends MY_Controller
                         return $objWriter->save('php://output');
                     }
 
-                    redirect($_SERVER["HTTP_REFERER"]);
+                    redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('billers'));
                 }
             } else {
                 $this->session->set_flashdata('error', $this->lang->line("no_biller_selected"));
-                redirect($_SERVER["HTTP_REFERER"]);
+                redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('billers'));
             }
         } else {
             $this->session->set_flashdata('error', validation_errors());
-            redirect($_SERVER["HTTP_REFERER"]);
+            redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('billers'));
         }
     }
 

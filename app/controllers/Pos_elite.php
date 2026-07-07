@@ -17,7 +17,7 @@ class Pos_elite extends MY_Controller {
         }
         if ($this->Customer || $this->Supplier) {
             $this->session->set_flashdata('warning', lang('access_denied'));
-            redirect($_SERVER["HTTP_REFERER"]);
+            redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('pos_elite'));
         }
 
         $this->load->library('user_agent');
@@ -334,8 +334,11 @@ class Pos_elite extends MY_Controller {
             $percentage = '%';
             $sale_cgst = $sale_sgst = $sale_igst = 0;
             $saleData = $this->pos_model->getPreviousPosSale();
-            $parts = explode("/", $saleData->reference_no);
-            $right_section = end($parts);
+            $right_section = '';
+            if ($saleData && !empty($saleData->reference_no)) {
+                $parts = explode("/", $saleData->reference_no);
+                $right_section = end($parts);
+            }
             $RefNoForExchange = $this->sma->getExchangeSaleReferenceNo($right_section);
             $i = isset($_POST['product_code']) ? sizeof($_POST['product_code']) : 0;
             for ($r = 0; $r < $i; $r++) {
@@ -726,7 +729,7 @@ class Pos_elite extends MY_Controller {
                                 if ($_POST['submit_type'] == 'notprint') {
                                     exit;
                                 } else {
-                                    redirect($_SERVER["HTTP_REFERER"]);
+                                    redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('pos_elite'));
                                 }
                             } else {
                                 $deposit = $this->site->customerDepositAmt($customer_id);
@@ -1419,12 +1422,15 @@ class Pos_elite extends MY_Controller {
         }
        
         $saleData = $this->pos_model->getPreviousPosSale();
-        $parts = explode("/", $saleData->reference_no);
-        $right_section = end($parts);
+        $right_section = '';
+        if ($saleData && !empty($saleData->reference_no)) {
+            $parts = explode("/", $saleData->reference_no);
+            $right_section = end($parts);
+        }
         $RefNo = $this->sma->getReturnSaleReferenceNo($right_section);
         $warehouse = $this->site->getWarehousesID($warehouse_id);
         $customer = $this->site->getCompanyByID($customer_id);
-        $customer_group = $this->site->getCustomerGroupByID($customer->customer_group_id);
+        $customer_group = $customer ? $this->site->getCustomerGroupByID($customer->customer_group_id) : null;
         // $row = $this->pos_model->getWHProduct($code, $warehouse_id);
         $row = $this->site->getProductByCode($code);
 
@@ -2068,7 +2074,7 @@ window.MyHandler.setPrintRequest('<?php echo json_encode($print); ?>');
     public function view($sale_id = null, $modal = null) {
         $this->data['myclass'] = $ci = & get_instance();
         $this->data['pos_settingss'] = $this->data['pos_settings'];
-        $this->data['go_back'] = $_SERVER["HTTP_REFERER"];
+        $this->data['go_back'] = isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('pos_elite');
         $this->sma->checkPermissions('index');
         if ($this->input->get('id')) {
             $sale_id = $this->input->get('id');
@@ -2342,6 +2348,9 @@ window.MyHandler.setPrintRequest('<?php echo json_encode($print); ?>');
         } else {
             $user_id = NULL;
         }
+
+        $register_open_time = null;
+        $date = date('Y-m-d 00:00:00');
 
         $this->data['error'] = (validation_errors() ? validation_errors() : $this->session->flashdata('error'));
         $this->data['ccsales'] = $this->pos_model->getTodayCCSales($user_id);       //Paid By CC
@@ -2904,7 +2913,7 @@ window.MyHandler.setPrintRequest('<?php echo json_encode($print); ?>');
                 $customer_id = $sale->customer_id;
                 if (!$this->site->check_customer_deposit($customer_id, $this->input->post('amount-paid'))) {
                     $this->session->set_flashdata('error', lang("amount_greater_than_deposit"));
-                    redirect($_SERVER["HTTP_REFERER"]);
+                    redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('pos_elite'));
                 }
             } else {
                 $customer_id = null;
@@ -2944,7 +2953,7 @@ window.MyHandler.setPrintRequest('<?php echo json_encode($print); ?>');
                 if (!$this->upload->do_upload()) {
                     $error = $this->upload->display_errors();
                     $this->session->set_flashdata('error', $error);
-                    redirect($_SERVER["HTTP_REFERER"]);
+                    redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('pos_elite'));
                 }
                 $photo = $this->upload->file_name;
                 $payment['attachment'] = $photo;
@@ -2953,7 +2962,7 @@ window.MyHandler.setPrintRequest('<?php echo json_encode($print); ?>');
             //$this->sma->print_arrays($payment);
         } elseif ($this->input->post('add_payment')) {
             $this->session->set_flashdata('error', validation_errors());
-            redirect($_SERVER["HTTP_REFERER"]);
+            redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('pos_elite'));
         }
 
         if ($this->form_validation->run() == true && $msg = $this->pos_model->addPayment($payment, $customer_id)) {
@@ -2978,7 +2987,7 @@ window.MyHandler.setPrintRequest('<?php echo json_encode($print); ?>');
                 $this->session->set_flashdata('error', lang("payment_failed"));
             }
             //redirect("pos/sales");
-            redirect($_SERVER["HTTP_REFERER"]);
+            redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('pos_elite'));
         } else {
 
             $this->data['error'] = (validation_errors() ? validation_errors() : $this->session->flashdata('error'));
@@ -2997,7 +3006,7 @@ window.MyHandler.setPrintRequest('<?php echo json_encode($print); ?>');
           if (DEMO) {
 
           $this->session->set_flashdata('warning', lang('disabled_in_demo'));
-          redirect($_SERVER["HTTP_REFERER"]);
+          redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('pos_elite'));
           }
           if (!$this->Owner) {
           $this->session->set_flashdata('error', lang('access_denied'));
@@ -3023,7 +3032,7 @@ window.MyHandler.setPrintRequest('<?php echo json_encode($print); ?>');
     public function install_update($file, $m_version, $version) {
         /* if (DEMO) {
           $this->session->set_flashdata('warning', lang('disabled_in_demo'));
-          redirect($_SERVER["HTTP_REFERER"]);
+          redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('pos_elite'));
           }
           if (!$this->Owner) {
           $this->session->set_flashdata('error', lang('access_denied'));
@@ -4140,7 +4149,7 @@ window.MyHandler.setTransactindata('<?php echo $PAYNEAR_APP_MERCHANT_ID; ?>',
                         if ($_POST['paid_by'][$r] == 'deposit') {
                             if (!$this->site->check_customer_deposit($customer_id, $amount)) {
                                 $this->session->set_flashdata('error', lang("amount_greater_than_deposit"));
-                                redirect($_SERVER["HTTP_REFERER"]);
+                                redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('pos_elite'));
                             }
                         }
                         if ($_POST['paid_by'][$r] == 'gift_card') {
@@ -5601,7 +5610,7 @@ window.MyHandler.setTransactindata('<?php echo $PAYNEAR_APP_MERCHANT_ID; ?>',
     {
         $this->data['myclass'] = $ci = & get_instance();
         $this->data['pos_settingss'] = $this->data['pos_settings'];
-        $this->data['go_back'] = $_SERVER["HTTP_REFERER"];
+        $this->data['go_back'] = isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('pos_elite');
         $this->sma->checkPermissions('index');
         if ($this->input->get('id')) {
             $sale_id = $this->input->get('id');
@@ -6105,7 +6114,7 @@ window.MyHandler.setPrintRequest('<?php echo json_encode($print); ?>');
             session_start();  // Start the session
             $_SESSION['flag'] = true;  // Set the session variable
             $this->session->set_flashdata('message', lang("Return_Sale_Added"));
-            redirect($_SERVER["HTTP_REFERER"]);
+            redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('pos_elite'));
         }
         
     }

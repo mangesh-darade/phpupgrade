@@ -16,6 +16,7 @@ class Db_model extends CI_Model
         $this->db->order_by('id', 'desc');
         $q = $this->db->get("sales", 5);
         if ($q->num_rows() > 0) {
+            $data = array();
             foreach (($q->result()) as $row) {
                 $data[] = $row;
             }
@@ -31,6 +32,7 @@ class Db_model extends CI_Model
         $this->db->order_by('id', 'desc');
         $q = $this->db->get("quotes", 5);
         if ($q->num_rows() > 0) {
+            $data = array();
             foreach (($q->result()) as $row) {
                 $data[] = $row;
             }
@@ -46,6 +48,7 @@ class Db_model extends CI_Model
         $this->db->order_by('id', 'desc');
         $q = $this->db->get("purchases", 5);
         if ($q->num_rows() > 0) {
+            $data = array();
             foreach (($q->result()) as $row) {
                 $data[] = $row;
             }
@@ -61,6 +64,7 @@ class Db_model extends CI_Model
         $this->db->order_by('id', 'desc');
         $q = $this->db->get("transfers", 5);
         if ($q->num_rows() > 0) {
+            $data = array();
             foreach (($q->result()) as $row) {
                 $data[] = $row;
             }
@@ -73,6 +77,7 @@ class Db_model extends CI_Model
         $this->db->order_by('id', 'desc');
         $q = $this->db->get_where("companies", array('group_name' => 'customer'), 5);
         if ($q->num_rows() > 0) {
+            $data = array();
             foreach (($q->result()) as $row) {
                 $data[] = $row;
             }
@@ -87,6 +92,7 @@ class Db_model extends CI_Model
     	//$q = $this->db->get("apinotify", array('status' => 'declined'), 5);
        //$q = $this->db->get("apinotify", 5);
         if ($q->num_rows() > 0) {
+            $data = array();
             foreach (($q->result()) as $row) {
                 $data[] = $row;
             }
@@ -101,6 +107,7 @@ class Db_model extends CI_Model
     	//$q = $this->db->get("apinotify", array('status' => 'declined'), 5);
        //$q = $this->db->get("apinotify", 5);
         if ($q->num_rows() > 0) {
+            $data = array();
             foreach (($q->result()) as $row) {
                 $data[] = $row;
             }
@@ -113,6 +120,7 @@ class Db_model extends CI_Model
         $this->db->order_by('id', 'desc');
         $q = $this->db->get_where("companies", array('group_name' => 'supplier'), 5);
         if ($q->num_rows() > 0) {
+            $data = array();
             foreach (($q->result()) as $row) {
                 $data[] = $row;
             }
@@ -145,6 +153,7 @@ class Db_model extends CI_Model
             ORDER BY S.Month";
         $q = $this->db->query($myQuery);
         if ($q->num_rows() > 0) {
+            $data = array();
             foreach (($q->result()) as $row) {
                 $data[] = $row;
             }
@@ -188,6 +197,7 @@ class Db_model extends CI_Model
             ->limit(10);
         $q = $this->db->get();
         if ($q->num_rows() > 0) {
+            $data = array();
             foreach (($q->result()) as $row) {
                 $data[] = $row;
             }

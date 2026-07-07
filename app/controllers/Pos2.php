@@ -13,7 +13,7 @@ class Pos2 extends MY_Controller
         }
         if ($this->Customer || $this->Supplier) {
             $this->session->set_flashdata('warning', lang('access_denied'));
-            redirect($_SERVER["HTTP_REFERER"]);
+            redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('pos2'));
         }
 
         $this->load->model('pos_model');
@@ -33,7 +33,7 @@ $this->data['pos_settings']->pos_theme = json_decode($this->data['pos_settings']
         $this->sma->checkPermissions('index');
         $this->data['error'] = (validation_errors()) ? validation_errors() : $this->session->flashdata('error');
         if(isset($this->data['error'])){
-			$error_url = "http://".$_SERVER[HTTP_HOST].$_SERVER[REQUEST_URI];
+			$error_url = "http://".$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'];
 			$logger = array($this->data['error'] , $error_url);
 			$this->pos_error_log($logger);
 		}
@@ -367,7 +367,7 @@ $this->data['pos_settings']->pos_theme = json_decode($this->data['pos_settings']
                         if ($_POST['paid_by'][$r] == 'deposit') {
                             if ( ! $this->site->check_customer_deposit($customer_id, $amount)) {
                                 $this->session->set_flashdata('error', lang("amount_greater_than_deposit"));
-                                redirect($_SERVER["HTTP_REFERER"]);
+                                redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('pos2'));
                             }
                         } 
                         if ($_POST['paid_by'][$r] == 'gift_card') {
@@ -1509,7 +1509,7 @@ $this->data['pos_settings']->pos_theme = json_decode($this->data['pos_settings']
                 $customer_id = $sale->customer_id;
                 if ( ! $this->site->check_customer_deposit($customer_id, $this->input->post('amount-paid'))) {
                     $this->session->set_flashdata('error', lang("amount_greater_than_deposit"));
-                    redirect($_SERVER["HTTP_REFERER"]);
+                    redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('pos2'));
                 }
             } else {
                 $customer_id = null;
@@ -1548,7 +1548,7 @@ $this->data['pos_settings']->pos_theme = json_decode($this->data['pos_settings']
                 if (!$this->upload->do_upload()) {
                     $error = $this->upload->display_errors();
                     $this->session->set_flashdata('error', $error);
-                    redirect($_SERVER["HTTP_REFERER"]);
+                    redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('pos2'));
                 }
                 $photo = $this->upload->file_name;
                 $payment['attachment'] = $photo;
@@ -1558,7 +1558,7 @@ $this->data['pos_settings']->pos_theme = json_decode($this->data['pos_settings']
 
         } elseif ($this->input->post('add_payment')) {
             $this->session->set_flashdata('error', validation_errors());
-            redirect($_SERVER["HTTP_REFERER"]);
+            redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('pos2'));
         }
 
         if ($this->form_validation->run() == TRUE && $msg = $this->pos_model->addPayment($payment, $customer_id)) {
@@ -1602,7 +1602,7 @@ $this->data['pos_settings']->pos_theme = json_decode($this->data['pos_settings']
          if (DEMO) {
          
             $this->session->set_flashdata('warning', lang('disabled_in_demo'));
-            redirect($_SERVER["HTTP_REFERER"]);
+            redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('pos2'));
         }
         if (!$this->Owner) {
             $this->session->set_flashdata('error', lang('access_denied'));
@@ -1629,7 +1629,7 @@ $this->data['pos_settings']->pos_theme = json_decode($this->data['pos_settings']
     {
         /*if (DEMO) {
             $this->session->set_flashdata('warning', lang('disabled_in_demo'));
-            redirect($_SERVER["HTTP_REFERER"]);
+            redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('pos2'));
         }
         if (!$this->Owner) {
             $this->session->set_flashdata('error', lang('access_denied'));

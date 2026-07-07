@@ -13,7 +13,7 @@ class Pos extends MY_Controller
         }
         if ($this->Customer || $this->Supplier) {
             $this->session->set_flashdata('warning', lang('access_denied'));
-            redirect($_SERVER["HTTP_REFERER"]);
+            redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('pos'));
         }
 
         $this->load->model('pos_model');
@@ -32,7 +32,7 @@ class Pos extends MY_Controller
         $this->sma->checkPermissions('index');
         $this->data['error'] = (validation_errors()) ? validation_errors() : $this->session->flashdata('error');
         if(isset($this->data['error'])){
-			$error_url = "http://".$_SERVER[HTTP_HOST].$_SERVER[REQUEST_URI];
+			$error_url = "http://".$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'];
 			$logger = array($this->data['error'] , $error_url);
 			$this->pos_error_log($logger);
 		}
@@ -366,7 +366,7 @@ class Pos extends MY_Controller
                         if ($_POST['paid_by'][$r] == 'deposit') {
                             if ( ! $this->site->check_customer_deposit($customer_id, $amount)) {
                                 $this->session->set_flashdata('error', lang("amount_greater_than_deposit"));
-                                redirect($_SERVER["HTTP_REFERER"]);
+                                redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('pos'));
                             }
                         } 
                         if ($_POST['paid_by'][$r] == 'gift_card') {
@@ -1506,7 +1506,7 @@ class Pos extends MY_Controller
                 $customer_id = $sale->customer_id;
                 if ( ! $this->site->check_customer_deposit($customer_id, $this->input->post('amount-paid'))) {
                     $this->session->set_flashdata('error', lang("amount_greater_than_deposit"));
-                    redirect($_SERVER["HTTP_REFERER"]);
+                    redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('pos'));
                 }
             } else {
                 $customer_id = null;
@@ -1545,7 +1545,7 @@ class Pos extends MY_Controller
                 if (!$this->upload->do_upload()) {
                     $error = $this->upload->display_errors();
                     $this->session->set_flashdata('error', $error);
-                    redirect($_SERVER["HTTP_REFERER"]);
+                    redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('pos'));
                 }
                 $photo = $this->upload->file_name;
                 $payment['attachment'] = $photo;
@@ -1555,7 +1555,7 @@ class Pos extends MY_Controller
 
         } elseif ($this->input->post('add_payment')) {
             $this->session->set_flashdata('error', validation_errors());
-            redirect($_SERVER["HTTP_REFERER"]);
+            redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('pos'));
         }
 
         if ($this->form_validation->run() == TRUE && $msg = $this->pos_model->addPayment($payment, $customer_id)) {
@@ -1599,7 +1599,7 @@ class Pos extends MY_Controller
          if (DEMO) {
          
             $this->session->set_flashdata('warning', lang('disabled_in_demo'));
-            redirect($_SERVER["HTTP_REFERER"]);
+            redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('pos'));
         }
         if (!$this->Owner) {
             $this->session->set_flashdata('error', lang('access_denied'));
@@ -1626,7 +1626,7 @@ class Pos extends MY_Controller
     {
         /*if (DEMO) {
             $this->session->set_flashdata('warning', lang('disabled_in_demo'));
-            redirect($_SERVER["HTTP_REFERER"]);
+            redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('pos'));
         }
         if (!$this->Owner) {
             $this->session->set_flashdata('error', lang('access_denied'));

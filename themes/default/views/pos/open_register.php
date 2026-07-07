@@ -123,7 +123,7 @@ input#cash_in_hand {
                     <?php if ($pos_settings->display_coinage == 1) { ?>
                     <div class="form-group">
                         <?= lang('Previous_Closer_Amount', 'Previous_Closer_Amount') ?>
-                        <?= form_input('previous_amount', $this->sma->formatMoney($closer_amount->total_cash_submitted), 'id="previous_amount" class="form-control" readonly'); ?>
+                        <?= form_input('previous_amount', $this->sma->formatMoney($closer_amount && isset($closer_amount->total_cash_submitted) ? $closer_amount->total_cash_submitted : 0), 'id="previous_amount" class="form-control" readonly'); ?>
                     </div>
                     <?php  } ?>
                     <div class="form-group">

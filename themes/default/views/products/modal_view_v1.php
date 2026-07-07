@@ -1007,6 +1007,7 @@
                                                 </div>
                                                 <?php
                                                 $colorArr = [];
+                                                if (!empty($colors)) {
                                                 foreach ($colors as $color) {
                                                     $color->name ? $colorArr[] = $color->name : '';
                                                 }
@@ -1019,6 +1020,7 @@
                                                             } ?>
                                                         </div>
                                                     </div>
+                                                <?php } ?>
                                                 <?php } ?>
                                             </div>
                                         </div>
