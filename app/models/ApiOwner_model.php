@@ -455,7 +455,7 @@ class ApiOwner_model extends CI_Model {
      * @param type $end_date
      * @return boolean
      */
-    public function getTodayPaymentOptionSales($payOpt = '', $startDate, $endDate) {
+    public function getTodayPaymentOptionSales($payOpt = '', $startDate = null, $endDate = null) {
         if (empty($payOpt))
             return false;
 

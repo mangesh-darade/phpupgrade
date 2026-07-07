@@ -38,18 +38,7 @@
  */
 defined('BASEPATH') OR exit('No direct script access allowed');
 
-/**
- * Application Controller Class
- *
- * This class object is the super class that every library in
- * CodeIgniter will be assigned to.
- *
- * @package		CodeIgniter
- * @subpackage	Libraries
- * @category	Libraries
- * @author		EllisLab Dev Team
- * @link		https://codeigniter.com/userguide3/general/controllers.html
- */
+#[\AllowDynamicProperties]
 class CI_Controller {
 
 	/**

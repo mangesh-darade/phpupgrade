@@ -1309,7 +1309,7 @@ class Shop_model extends CI_Model {
      * @param type $payStatus
      * @return boolean
      */
-    public function updateStatusOrder($id, $status, $note, $payStatus = '', $PaidAmt) {
+    public function updateStatusOrder($id, $status, $note, $payStatus = '', $PaidAmt = null) {
         $sale = $this->getInvoiceOrderByID($id);
         $items = $this->getAllInvoiceItemsOrder($id);
         $cost = array();

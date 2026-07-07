@@ -8,7 +8,7 @@ class Whatsapp_model extends CI_Model {
     private $cheerio_direct_url = 'https://pre-prod.cheerio.in/direct-apis/v1/whatsapp/direct/send';
     private $cheerio_token = '4ea57614e974b97e724d97a95866a1dd23304f7c524a0f9c3fd9a0b31a8716e6';
 
-    public function send_cheerio_templete($phone, $template_name, $params = [],$order_id, $type = null) {
+    public function send_cheerio_templete($phone, $template_name, $params = [],$order_id = null, $type = null) {
         // Format template parameters
         $body_parameters = [];
         foreach ($params as $text) {
@@ -253,7 +253,7 @@ class Whatsapp_model extends CI_Model {
             return false;
         }
     }
-    public function send_cheerio_direct_massage($phone, $template_name, $params = [],$order_id) {
+    public function send_cheerio_direct_massage($phone, $template_name, $params = [],$order_id = null) {
         // Format template parameters
         $body_parameters = [];
         foreach ($params as $text) {

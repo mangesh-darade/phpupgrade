@@ -2969,7 +2969,7 @@ class Sales_model extends CI_Model {
             return $data;
         }
     }
-    public function getcombodata($bundel_item_code, $warehouse_id = null, $product_id){
+    public function getcombodata($bundel_item_code, $warehouse_id = null, $product_id = null){
         $q = $this->db->get_where('combo_items', array('combo_items.product_id' => $product_id, 'combo_items.item_code' => $bundel_item_code));
         if ($q->num_rows() > 0) {
             foreach (($q->result()) as $row) {
@@ -2979,7 +2979,7 @@ class Sales_model extends CI_Model {
         }
         return FALSE;
     }
-    public function getcombodatabyId($Bid, $warehouse_id = null, $product_id){
+    public function getcombodatabyId($Bid, $warehouse_id = null, $product_id = null){
       
         $q = $this->db->get_where('combo_items', array('combo_items.product_id' => $product_id, 'combo_items.item_code' => $Bid));
         if ($q->num_rows() > 0) {

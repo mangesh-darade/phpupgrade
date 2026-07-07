@@ -38,15 +38,7 @@
  */
 defined('BASEPATH') OR exit('No direct script access allowed');
 
-/**
- * Model Class
- *
- * @package		CodeIgniter
- * @subpackage	Libraries
- * @category	Libraries
- * @author		EllisLab Dev Team
- * @link		https://codeigniter.com/userguide3/libraries/config.html
- */
+#[\AllowDynamicProperties]
 class CI_Model {
 
 	/**

@@ -54,7 +54,7 @@ class Production_Unit_Model extends CI_Model {
 
     }
     //  get order items details
-    public function getProcurementdetails($procurmentRefNo = null,$status= null,$itemId= null, $location_id) {
+    public function getProcurementdetails($procurmentRefNo = null,$status= null,$itemId= null, $location_id = null) {
         
         // Use warehouses_products for stock and derive open_order_quantity from procurement items
         $this->db->select("

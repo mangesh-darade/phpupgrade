@@ -1241,7 +1241,7 @@ class Pos_model extends CI_Model {
         return $this->db->count_all_results("suspended_bills");
     }
 
-    public function fetch_bills($limit, $start, $dir = NULL,$customerId) {
+    public function fetch_bills($limit, $start, $dir = NULL,$customerId = null) {
         $dir1 = empty($dir) ? 'ASC' : 'DESC';
         /*if (!$this->Owner && !$this->Admin) {
             $this->db->where('created_by', $this->session->userdata('user_id'));
@@ -1846,7 +1846,7 @@ class Pos_model extends CI_Model {
 
     /* --- 13-03-19 New Register Seles  All payment Option Use Where Condition ---- */
 
-    public function getRegisterPaymentSales($date, $user_id = NULL, $condition) {
+    public function getRegisterPaymentSales($date, $user_id = NULL, $condition = null) {
         if (!$date) {
             $date = $this->session->userdata('register_open_time');
         }

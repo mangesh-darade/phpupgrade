@@ -2348,7 +2348,7 @@ class Pos extends MY_Controller {
         }
     }
 
-    public function ajaxproducts($category_id = null, $brand_id = null,$seasons_id) {
+    public function ajaxproducts($category_id = null, $brand_id = null,$seasons_id = null) {
         $this->sma->checkPermissions('index');
         $Settings = $this->Settings;
         $pos_screen_products = $this->pos_settings->pos_screen_products;
@@ -6984,7 +6984,8 @@ window.MyHandler.setPrintRequest('<?php echo json_encode($print); ?>');
         $this->load->model('companies_model');
         $scanValue =  $this->input->get('scanValue');
         $customer =  $this->input->get('term');
-        $CounterNO = end(explode('/', $scanValue));  
+        $scanParts = explode('/', $scanValue);
+        $CounterNO = end($scanParts);
         $customerId = explode('/', $scanValue)[0];
         $phoneNo = $this->pos_model->checkCustomerdetails($customer);
       

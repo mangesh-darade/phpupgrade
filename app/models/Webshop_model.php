@@ -1582,7 +1582,7 @@ class Webshop_model extends CI_Model {
      * @param type $payStatus
      * @return boolean
      */
-    public function updatePaytmStatusOrder($id, $status, $note, $payStatus = '', $PaidAmt) {
+    public function updatePaytmStatusOrder($id, $status, $note, $payStatus = '', $PaidAmt = null) {
         $sale = $this->get_order_by_id($id);
         $items = $this->get_order_items_by_order_id($id);
         $cost = array();

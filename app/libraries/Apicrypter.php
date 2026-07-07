@@ -10,23 +10,15 @@ class Apicrypter  {
     public function encrypt($str) { 
 	  $str = $this->pkcs5_pad($str);   
 	  $iv = $this->iv; 
-	  $td = mcrypt_module_open('rijndael-128', '', 'cbc', $iv); 
-	  mcrypt_generic_init($td, $this->key, $iv);
-	  $encrypted = mcrypt_generic($td, $str); 
-	  mcrypt_generic_deinit($td);
-	  mcrypt_module_close($td); 
+	  $encrypted = openssl_encrypt($str, 'AES-128-CBC', $this->key, OPENSSL_RAW_DATA | OPENSSL_ZERO_PADDING, $iv);
 	  return bin2hex($encrypted);
     }
 
     public function decrypt($code) { 
 	  $code = $this->hex2bin($code);
 	  $iv = $this->iv; 
-	  $td = mcrypt_module_open('rijndael-128', '', 'cbc', $iv); 
-	  mcrypt_generic_init($td, $this->key, $iv);
-	  $decrypted = mdecrypt_generic($td, $code); 
-	  mcrypt_generic_deinit($td);
-	  mcrypt_module_close($td); 
-	  $ut =  utf8_encode(trim($decrypted));
+	  $decrypted = openssl_decrypt($code, 'AES-128-CBC', $this->key, OPENSSL_RAW_DATA | OPENSSL_ZERO_PADDING, $iv);
+	  $ut = mb_convert_encoding(trim($decrypted), 'UTF-8', 'ISO-8859-1');
 	  return $this->pkcs5_unpad($ut);
     }
 
@@ -45,7 +37,7 @@ class Apicrypter  {
     }
 
     protected function pkcs5_unpad($text) {
-	  $pad = ord($text{strlen($text)-1});
+	  $pad = ord($text[strlen($text)-1]);
 	  if ($pad > strlen($text)) {
 	      return false;	
 	  }

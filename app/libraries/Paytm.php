@@ -29,14 +29,10 @@ class Paytm {
 
     function encrypt_e($input, $ky) {
 	$key = $ky;
-	$size = mcrypt_get_block_size(MCRYPT_RIJNDAEL_128, 'cbc');
+	$size = 16;
 	$input = $this->pkcs5_pad_e($input, $size);
-	$td = mcrypt_module_open(MCRYPT_RIJNDAEL_128, '', 'cbc', '');
 	$iv = "@@@@&&&&####$$$$";
-	mcrypt_generic_init($td, $key, $iv);
-	$data = mcrypt_generic($td, $input);
-	mcrypt_generic_deinit($td);
-	mcrypt_module_close($td);
+	$data = openssl_encrypt($input, 'AES-128-CBC', $key, OPENSSL_RAW_DATA | OPENSSL_ZERO_PADDING, $iv);
 	$data = base64_encode($data);
 	return $data;
     }
@@ -45,12 +41,8 @@ class Paytm {
 
             $crypt = base64_decode($crypt);
             $key = $ky;
-            $td = mcrypt_module_open(MCRYPT_RIJNDAEL_128, '', 'cbc', '');
             $iv = "@@@@&&&&####$$$$";
-            mcrypt_generic_init($td, $key, $iv);
-            $decrypted_data = mdecrypt_generic($td, $crypt);
-            mcrypt_generic_deinit($td);
-            mcrypt_module_close($td);
+            $decrypted_data = openssl_decrypt($crypt, 'AES-128-CBC', $key, OPENSSL_RAW_DATA | OPENSSL_ZERO_PADDING, $iv);
             $decrypted_data = $this->pkcs5_unpad_e($decrypted_data);
             $decrypted_data = rtrim($decrypted_data);
             return $decrypted_data;
@@ -62,7 +54,7 @@ class Paytm {
     }
 
     function pkcs5_unpad_e($text) {
-            $pad = ord($text{strlen($text) - 1});
+            $pad = ord($text[strlen($text) - 1]);
             if ($pad > strlen($text))
                     return false;
             return substr($text, 0, -1 * $pad);
@@ -70,7 +62,7 @@ class Paytm {
 
     function generateSalt_e($length) {
             $random = "";
-            srand((double) microtime() * 1000000);
+            srand((float) microtime() * 1000000);
 
             $data = "AbcDE123IJKLMN67QRSTUVWXYZ";
             $data .= "aBCdefghijklmn123opq45rs67tuv89wxyz";

@@ -1019,7 +1019,7 @@ class Urban_piper_model  extends CI_Model
      * @param type $item_quantity
      * @return type
      */
-    public function calculateUPOrderCost($product_id, $warehouse_id, $net_unit_price, $unit_price, $quantity, $product_name, $option_id = 0, $item_quantity)
+    public function calculateUPOrderCost($product_id, $warehouse_id, $net_unit_price, $unit_price, $quantity, $product_name, $option_id = 0, $item_quantity = null)
     {
         $option_id = $option_id ? $option_id : 0;
 
@@ -1092,7 +1092,7 @@ class Urban_piper_model  extends CI_Model
      * @param type $item_quantity
      * @return type
      */
-    public function calculateUPOrderAVCost($product_id, $warehouse_id, $net_unit_price, $unit_price, $quantity, $product_name, $option_id = 0, $item_quantity)
+    public function calculateUPOrderAVCost($product_id, $warehouse_id, $net_unit_price, $unit_price, $quantity, $product_name, $option_id = 0, $item_quantity = null)
     {
         $option_id = $option_id ? $option_id : 0;
         $real_item_qty = $quantity;

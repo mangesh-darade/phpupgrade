@@ -2,6 +2,7 @@
 
 defined('BASEPATH') or exit('No direct script access allowed');
 
+#[\AllowDynamicProperties]
 class Sma {
 
     private $_merchant_phone;   // Merchant Phone
@@ -621,7 +622,7 @@ class Sma {
             $num = substr($num, 0, $pos);
         }
 
-        if (strlen($num) > 3 & strlen($num) <= 12) {
+        if (strlen($num) > 3 && strlen($num) <= 12) {
             $last3digits = substr($num, -3);
             $numexceptlastdigits = substr($num, 0, -3);
             $formatted = $this->makecomma($numexceptlastdigits);

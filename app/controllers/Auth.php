@@ -20,7 +20,7 @@ class Auth extends MY_Controller
             redirect('login');
         } else {
             $this->data['message'] = (validation_errors()) ? validation_errors() : $this->session->flashdata('message');
-            redirect($_SERVER['HTTP_REFERER']);
+            redirect(isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : site_url('auth/login'));
         }
     }
 
@@ -91,9 +91,10 @@ class Auth extends MY_Controller
     {
 
         if (!$this->ion_auth->logged_in() || !$this->ion_auth->in_group('owner') && $id != $this->session->userdata('user_id')) {
+            $referer = isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : site_url('auth/login');
             $this->session->set_flashdata('warning', lang("access_denied"));
-            die("<script type='text/javascript'>setTimeout(function(){ window.top.location.href = '" . $_SERVER["HTTP_REFERER"] . "'; }, 0);</script>");
-            redirect($_SERVER["HTTP_REFERER"]);
+            die("<script type='text/javascript'>setTimeout(function(){ window.top.location.href = '" . $referer . "'; }, 0);</script>");
+            redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('auth/login'));
         } else {
             unlink('assets/mdata/'.$this->Customer_assets.'/uploads/avatars/' . $avatar);
             unlink('assets/mdata/'.$this->Customer_assets.'/uploads/avatars/thumbs/' . $avatar);
@@ -104,7 +105,7 @@ class Auth extends MY_Controller
             $this->session->set_flashdata('message', lang("avatar_deleted"));
             
           // die("<script type='text/javascript'>setTimeout(function(){ window.top.location.href = '" . $_SERVER["HTTP_REFERER"] . "'; }, 0);</script>");
-            // redirect($_SERVER["HTTP_REFERER"]);
+            // redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('auth/login'));
          redirect('auth/profile/'.$id);
         }
     }
@@ -116,7 +117,7 @@ class Auth extends MY_Controller
       $can_users_edit = $this->sma->actionPermissions('edit', 'users');
       if (!$this->ion_auth->logged_in() || (!$can_users_edit && $id != $this->session->userdata('user_id'))) {
             $this->session->set_flashdata('warning', lang("access_denied"));
-            redirect($_SERVER["HTTP_REFERER"]);
+            redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('auth/login'));
         }
         
 
@@ -462,7 +463,7 @@ function restandlogout(){
         } else {
             if (DEMO) {
                 $this->session->set_flashdata('warning', lang('disabled_in_demo'));
-                redirect($_SERVER["HTTP_REFERER"]);
+                redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('auth/login'));
             }
 
             $identity = $this->session->userdata($this->config->item('identity', 'ion_auth'));
@@ -601,7 +602,7 @@ function restandlogout(){
         if ($activation) {
             $this->session->set_flashdata('message', $this->ion_auth->messages());
             if ($this->Owner) {
-                redirect($_SERVER["HTTP_REFERER"]);
+                redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('auth/login'));
             } else {
                 redirect("auth/login");
             }
@@ -620,7 +621,7 @@ function restandlogout(){
         if ($this->form_validation->run() == FALSE) {
             if ($this->input->post('deactivate')) {
                 $this->session->set_flashdata('error', validation_errors());
-                redirect($_SERVER["HTTP_REFERER"]);
+                redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('auth/login'));
             } else {
                 $this->data['csrf'] = $this->_get_csrf_nonce();
                 $this->data['user'] = $this->ion_auth->user($id)->row();
@@ -640,7 +641,7 @@ function restandlogout(){
                 }
             }
 
-            redirect($_SERVER["HTTP_REFERER"]);
+            redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('auth/login'));
         }
     }
 
@@ -732,7 +733,7 @@ function restandlogout(){
 
         if (!$this->loggedIn) {
             $this->session->set_flashdata('warning', lang("access_denied"));
-            redirect($_SERVER["HTTP_REFERER"]);
+            redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('auth/login'));
         }
         if ($id != $this->session->userdata('user_id')) {
             $this->sma->checkPermissions('edit', null, 'users');
@@ -834,7 +835,7 @@ function restandlogout(){
                 if ($this->input->post('password')) {
                     if (DEMO) {
                         $this->session->set_flashdata('warning', lang('disabled_in_demo'));
-                        redirect($_SERVER["HTTP_REFERER"]);
+                        redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('auth/login'));
                     }
                     $this->form_validation->set_rules('password', lang('edit_user_validation_password_label'), 'required|min_length[8]|max_length[25]|matches[password_confirm]');
                     $this->form_validation->set_rules('password_confirm', lang('edit_user_validation_password_confirm_label'), 'required');
@@ -859,7 +860,7 @@ function restandlogout(){
             //redirect("auth/profile/" . $id);
         } else {
             $this->session->set_flashdata('error', validation_errors());
-            redirect($_SERVER["HTTP_REFERER"]);
+            redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('auth/login'));
         }
     }
 
@@ -909,7 +910,7 @@ function restandlogout(){
 
         if (!$this->ion_auth->logged_in() || !$this->Owner && $id != $this->session->userdata('user_id')) {
             $this->session->set_flashdata('warning', lang("access_denied"));
-            redirect($_SERVER["HTTP_REFERER"]);
+            redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('auth/login'));
         }
 
         //validate form input
@@ -936,7 +937,7 @@ function restandlogout(){
 
                     $error = $this->upload->display_errors();
                     $this->session->set_flashdata('error', $error);
-                    redirect($_SERVER["HTTP_REFERER"]);
+                    redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('auth/login'));
                 }
 
                 $photo = $this->upload->file_name;
@@ -1103,7 +1104,7 @@ function restandlogout(){
     {
         if (!$this->loggedIn) {
             $this->session->set_flashdata('warning', lang('access_denied'));
-            redirect($_SERVER["HTTP_REFERER"]);
+            redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('auth/login'));
         }
 
         $this->form_validation->set_rules('form_action', lang("form_action"), 'required');
@@ -1115,7 +1116,7 @@ function restandlogout(){
                     $can_users_delete = !empty($this->Owner) || !empty($this->Admin) || $this->sma->actionPermissions('delete', 'users');
                     if (!$can_users_delete) {
                         $this->session->set_flashdata('warning', lang('access_denied'));
-                        redirect($_SERVER["HTTP_REFERER"]);
+                        redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('auth/login'));
                     }
                     foreach ($_POST['val'] as $id) {
                         if ($id != $this->session->userdata('user_id')) {
@@ -1123,14 +1124,14 @@ function restandlogout(){
                         }
                     }
                     $this->session->set_flashdata('message', lang("users_deleted"));
-                    redirect($_SERVER["HTTP_REFERER"]);
+                    redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('auth/login'));
                 }
 
                 if ($this->input->post('form_action') == 'export_excel' || $this->input->post('form_action') == 'export_pdf') {
                     $can_users_index = !empty($this->Owner) || !empty($this->Admin) || $this->sma->actionPermissions('index', 'users');
                     if (!$can_users_index) {
                         $this->session->set_flashdata('warning', lang('access_denied'));
-                        redirect($_SERVER["HTTP_REFERER"]);
+                        redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('auth/login'));
                     }
 
                     $this->load->library('excel');
@@ -1193,15 +1194,15 @@ function restandlogout(){
                         return $objWriter->save('php://output');
                     }
 
-                    redirect($_SERVER["HTTP_REFERER"]);
+                    redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('auth/login'));
                 }
             } else {
                 $this->session->set_flashdata('error', lang("no_user_selected"));
-                redirect($_SERVER["HTTP_REFERER"]);
+                redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('auth/login'));
             }
         } else {
             $this->session->set_flashdata('error', validation_errors());
-            redirect($_SERVER["HTTP_REFERER"]);
+            redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('auth/login'));
         }
     }
 
@@ -1209,7 +1210,7 @@ function restandlogout(){
     {
         if (DEMO) {
             $this->session->set_flashdata('warning', lang('disabled_in_demo'));
-            redirect($_SERVER["HTTP_REFERER"]);
+            redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('auth/login'));
         }
         if ($this->input->get('id')) { $id = $this->input->get('id'); }
 
@@ -1222,7 +1223,7 @@ function restandlogout(){
         if ($this->auth_model->delete_user($id)) {
             //echo lang("user_deleted");
             $this->session->set_flashdata('message', 'user_deleted');
-            redirect($_SERVER["HTTP_REFERER"]);
+            redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('auth/login'));
         }
     }
 ///////////////////////////forgot_password_mobile //////////////////////////////////////////

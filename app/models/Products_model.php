@@ -123,7 +123,7 @@ class Products_model extends CI_Model {
         return FALSE;
     }
 
-   public function getProductOptionsWithWH($pid, $GroupId='',$warehouse_ids)
+   public function getProductOptionsWithWH($pid, $GroupId='',$warehouse_ids = null)
     {
 		if($GroupId!='')
 			$this->db->where(array('product_variants.group_id' => $GroupId));
@@ -890,7 +890,7 @@ class Products_model extends CI_Model {
         return false;
     }
 
-    public function getQASuggestions($term, $limit = 50, $warehouse_id) {
+    public function getQASuggestions($term, $limit = 50, $warehouse_id = null) {
         // First, try to find exact match for product code
         $this->db->select('' . $this->db->dbprefix('products') . '.id, code, ' . $this->db->dbprefix('products') . '.name as name, COALESCE(' . $this->db->dbprefix('warehouses_products') . '.quantity, 0) as product_qty', FALSE)
                 ->from('products')

@@ -1,5 +1,6 @@
 <?php defined('BASEPATH') OR exit('No direct script access allowed');
 
+#[\AllowDynamicProperties]
 class Ion_auth
 {
 
@@ -120,7 +121,7 @@ class Ion_auth
                 $parse_data = array(
                     'client_name' => $profile->first_name . ' ' . $profile->last_name,
                     'email' => $profile->email,
-                    'password' => $password,
+                    'password' => $new_password,
                     'site_link' => base_url(),
                     'site_name' => $this->Settings->site_name,
                     'logo' => '<img src="' . base_url() . 'assets/mdata/'.$this->Customer_assets.'/uploads/logos/' . $this->Settings->logo . '" alt="' . $this->Settings->site_name . '"/>'

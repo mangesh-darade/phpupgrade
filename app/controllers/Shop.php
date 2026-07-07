@@ -3271,7 +3271,7 @@ class Shop extends MY_Controller {
         $this->load_shop_view('password_reset_success', $this->data);
     }
 
-    public function sendEmail($email, $subject, $content, $from = null, $from_name = null, $attachment, $cc = null, $bcc = null) {
+    public function sendEmail($email, $subject, $content, $from = null, $from_name = null, $attachment = null, $cc = null, $bcc = null) {
 
         $res = $this->sma->send_email($email, $subject, $content, $from = null, $from_name = null, $attachment, $cc = null, $bcc = null);
 

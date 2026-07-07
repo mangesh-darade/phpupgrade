@@ -1439,7 +1439,7 @@ class Site extends CI_Model {
     /**
      * End Get return qty 
      */
-    public function calculateAVCost($product_id, $warehouse_id, $net_unit_price, $unit_price, $quantity, $product_name, $option_id = 0, $item_quantity, $batch_number = null) {
+    public function calculateAVCost($product_id, $warehouse_id, $net_unit_price, $unit_price, $quantity, $product_name, $option_id = 0, $item_quantity = null, $batch_number = null) {
         $real_item_qty = $quantity;
         $product = $this->getProductByID($product_id);
         //$product_avg_cost = $this->db->select('cost')->where('id', $product_id)->get('products')->row();
@@ -1520,7 +1520,7 @@ class Site extends CI_Model {
 
 
 
-    public function calculateCost($product_id, $warehouse_id, $net_unit_price, $unit_price, $quantity, $product_name, $option_id = 0, $item_quantity, $batch_number = null) {
+    public function calculateCost($product_id, $warehouse_id, $net_unit_price, $unit_price, $quantity, $product_name, $option_id = 0, $item_quantity = null, $batch_number = null) {
         $option_id = $option_id ? $option_id : 0;
         $batch_number = $batch_number ? $batch_number : NULL;
         $unit_quantity = 1;
@@ -2971,7 +2971,7 @@ class Site extends CI_Model {
         return $cost;
     }
 
-    public function calculateOrderCost($product_id, $warehouse_id, $net_unit_price, $unit_price, $quantity, $product_name, $option_id = 0, $item_quantity) {
+    public function calculateOrderCost($product_id, $warehouse_id, $net_unit_price, $unit_price, $quantity, $product_name, $option_id = 0, $item_quantity = null) {
         $option_id = $option_id ? $option_id : 0;
 
         $real_item_qty = $quantity;
@@ -3031,7 +3031,7 @@ class Site extends CI_Model {
         return $cost;
     }
 
-    public function calculateOrderAVCost($product_id, $warehouse_id, $net_unit_price, $unit_price, $quantity, $product_name, $option_id = 0, $item_quantity) {
+    public function calculateOrderAVCost($product_id, $warehouse_id, $net_unit_price, $unit_price, $quantity, $product_name, $option_id = 0, $item_quantity = null) {
         $option_id = $option_id ? $option_id : 0;
         $real_item_qty = $quantity;
         $wp_details = $this->getWarehouseProduct($warehouse_id, $product_id);

@@ -18,7 +18,7 @@
 |-------|-------|------------|----------|------|--------|
 | Phase 1 | `system/` | CI 3.1.13 + PHP 8 session wrappers | Critical | Low | Done |
 | Phase 2 | `app/third_party/` | MPDF, PHPExcel, Stripe, Google SDK upgrade | Critical | High | Done |
-| Phase 3 | `app/` | Controllers, Models, `libraries/Sma.php` | High | Medium | Pending |
+| Phase 3 | `app/` | Controllers, Models, `libraries/Sma.php` | High | Medium | In Progress |
 | Phase 4 | All modules | Module-wise screen testing | Medium | — | Pending |
 
 ---
@@ -104,6 +104,34 @@
 | `app/third_party/googlelogin/` | ~13,349 files | Replaced by `vendor/google/apiclient` |
 | `app/third_party/paypal/` | ~616 files | REST SDK unused — app uses `Paypal_pro` |
 | `app/third_party/MPDF/mpdf_legacy_6.php` | 1 file | Backup of mPDF 6 entry point |
+
+### 3.5 Phase 3 Progress (App Code — PHP 8.5)
+
+#### Batch 1 — Auth + core (Done)
+
+| Area | Files | Fix |
+|------|-------|-----|
+| Dynamic properties | `system/core/Controller.php`, `Model.php`, `MY_Controller.php`, `Auth_model.php` | `#[\AllowDynamicProperties]` |
+| Auth | `Auth.php`, `Ion_auth.php` | HTTP_REFERER guards, `$new_password` email fix |
+| Param order | 15 models/controllers | 30 signatures — trailing `= null` defaults |
+| Fatal syntax | `Paytm.php`, `Apicrypter.php` | Curly-brace offsets, cast fix |
+
+#### Batch 2 — Crypto + POS (Done)
+
+| Area | Files | Fix |
+|------|-------|-----|
+| mcrypt → OpenSSL | `Encrypt.php`, `crypto_helper.php`, `Ccavenue.php`, `Paytm.php`, `Apicrypter.php` | AES-128/256-CBC via OpenSSL |
+| Sma library | `Sma.php` | `#[\AllowDynamicProperties]`, `&` → `&&` |
+| POS | `Pos.php`, `Pos_elite.php` | `end(explode())` → temp variable |
+
+#### Batch 3 — Pending
+
+| Area | Action |
+|------|--------|
+| Auth testing | Login, OTP, user list, session |
+| Welcome / Settings | Screen load + form save |
+| POS / Sales | PDF, payments, DataTables |
+| Remaining controllers | Full module scan during Phase 4 |
 
 ---
 

@@ -1339,7 +1339,7 @@ public function getWarehouseStockValue($id)
         return false;
     }
 
-    public function getSalesItems($start_date = NULL, $end_date = NULL, $warehouse_id) {
+    public function getSalesItems($start_date = NULL, $end_date = NULL, $warehouse_id = NULL) {
         $query = "SELECT  `product_id` ,`product_code` , `product_name` ,  `net_unit_price` , `product_unit_code` unit,
                     SUM(  `quantity` ) qty, SUM(  `item_tax` ) tax, tax as tax_rate, SUM(  `item_discount` ) discount, SUM(  `subtotal` ) total
                 FROM  " . $this->db->dbprefix('sale_items') . "  
@@ -2439,7 +2439,7 @@ public function getWarehouseStockValue($id)
 
     /*     * 28-1-2020* */
 
-    public function getSalesInvoice($start_date = NULL, $end_date = NULL, $warehouse_id) {
+    public function getSalesInvoice($start_date = NULL, $end_date = NULL, $warehouse_id = NULL) {
         $query = "SELECT  DATE_FORMAT(s.date, '%Y-%m-%d') as date , s.id as invoice_no , s.customer ,  s.total_discount AS discount, p.amount AS recieved_amt,
                   s.`total` as netsale, s.total_tax as tax,s.`total` as  net_total,s.`paid` as  paid ,s.`rounding` as  rounding
                   FROM  sma_sales s lEFT JOIN sma_payments p  ON p.sale_id = s.id  WHERE DATE(s.date) >= '$start_date' AND DATE(s.date) <= '$end_date'  AND 
@@ -2841,7 +2841,7 @@ public function getWarehouseStockValue($id)
         return FALSE;
     }
 
-    public function sale_purchase_chart_details($WarehouseId = 0, $Type) {
+    public function sale_purchase_chart_details($WarehouseId = 0, $Type = NULL) {
         $Whr = '';
         if ($WarehouseId != 0)
             $Whr = " and warehouse_id='$WarehouseId' ";
@@ -2903,7 +2903,7 @@ public function getWarehouseStockValue($id)
         return FALSE;
     }
 
-    public function sale_brand_chart_details($WarehouseId = 0, $StartDate, $EndDate, $Records = '') {
+    public function sale_brand_chart_details($WarehouseId = 0, $StartDate = NULL, $EndDate = NULL, $Records = '') {
         $Whr = '';
         if ($WarehouseId != 0)
             $Whr .= " and s.warehouse_id='$WarehouseId' ";
@@ -2929,7 +2929,7 @@ public function getWarehouseStockValue($id)
         return FALSE;
     }
 
-    public function purchase_brand_chart_details($WarehouseId = 0, $StartDate, $EndDate, $Records = '') {
+    public function purchase_brand_chart_details($WarehouseId = 0, $StartDate = NULL, $EndDate = NULL, $Records = '') {
         $Whr = '';
         if ($WarehouseId != 0)
             $Whr .= " and s.warehouse_id='$WarehouseId' ";
@@ -2955,7 +2955,7 @@ public function getWarehouseStockValue($id)
         return FALSE;
     }
 
-    public function sale_categories_chart_details($WarehouseId = 0, $StartDate, $EndDate, $cat_id = '', $Records = '') {
+    public function sale_categories_chart_details($WarehouseId = 0, $StartDate = NULL, $EndDate = NULL, $cat_id = '', $Records = '') {
         $Whr = '';
         if ($WarehouseId != 0)
             $Whr .= " and s.warehouse_id='$WarehouseId' ";
@@ -2988,7 +2988,7 @@ public function getWarehouseStockValue($id)
         return FALSE;
     }
 
-    public function purchase_categories_chart_details($WarehouseId = 0, $StartDate, $EndDate, $cat_id = '', $Records = '') {
+    public function purchase_categories_chart_details($WarehouseId = 0, $StartDate = NULL, $EndDate = NULL, $cat_id = '', $Records = '') {
         $Whr = '';
         if ($WarehouseId != 0)
             $Whr .= " and s.warehouse_id='$WarehouseId' ";
@@ -3021,7 +3021,7 @@ public function getWarehouseStockValue($id)
         return FALSE;
     }
 
-    public function sale_purchase_payment_summary_chart($WarehouseId = 0, $start_date, $end_date, $Records = '', $Sale_Purchase) {
+    public function sale_purchase_payment_summary_chart($WarehouseId = 0, $start_date = NULL, $end_date = NULL, $Records = '', $Sale_Purchase = NULL) {
         $this->db->select(' DATE_FORMAT(sma_payments.date, "%Y-%m-%d") as date, sum(sma_payments.amount) as Total, sma_payments.paid_by');
         if ($start_date && $end_date) {
             $this->db->where('DATE_FORMAT(sma_payments.date, "%Y-%m-%d") ' . ' BETWEEN "' . $start_date . '" and "' . $end_date . '"');
@@ -3860,7 +3860,7 @@ public function getWarehouseStockValue($id)
         return FALSE;
     }
 	 //Transfer 
-    public function transfer_categories_chart_details($WarehouseId = 0, $StartDate, $EndDate, $cat_id = '', $Records = '') {
+    public function transfer_categories_chart_details($WarehouseId = 0, $StartDate = NULL, $EndDate = NULL, $cat_id = '', $Records = '') {
         $Whr = '';
         // Filter by Warehouse ID if provided
         if ($WarehouseId != 0)
@@ -3912,7 +3912,7 @@ public function getWarehouseStockValue($id)
         return FALSE;
     }
     // Transfer Brand Chart detais
-    public function transfer_brand_chart_details($WarehouseId = 0, $StartDate, $EndDate, $Records = '') {
+    public function transfer_brand_chart_details($WarehouseId = 0, $StartDate = NULL, $EndDate = NULL, $Records = '') {
         $Whr = '';
         if ($WarehouseId != 0)
             $Whr .= " and t.to_warehouse_id='$WarehouseId' ";
